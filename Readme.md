@@ -6,8 +6,8 @@ Egy átlagszámoló BME-seknek, azon belül is VIK-eseknek.
 ### Nem vagyok se VIK-es, se BME-s, nekem hasznos?
 Ha úgy számoljátok az átlagokat mint mi, akkor igen.
 
-### Mivel tud többet mint az xyz oldal/én programom/egy számlológép?
-Reményem szerint képes beolvasni a Neptun spreadsheetjeit, ezzel gyorsabbá téve a számolgatást.
+### Mivel tud többet mint az xyz oldal/én programom/egy számológép?
+Reményeim szerint képes beolvasni a Neptun spreadsheetjeit, ezzel gyorsabbá téve a számolgatást.
 Meg tud SCH kolipontot is számolni.
 
 ### Ezeket az xyz oldal/én programom is tudja
