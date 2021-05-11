@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import bme.creditcalc.Semester;
 import bme.creditcalc.Subject;
+import bme.creditcalc.SemesterList;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -15,9 +16,9 @@ import javax.swing.*;
 
 public class NeptunReader extends SwingWorker<Semester, Object> {
     File file;
-    DefaultComboBoxModel<Semester> model;
+    SemesterList model;
 
-    public NeptunReader(File file, DefaultComboBoxModel<Semester> model){
+    public NeptunReader(File file, SemesterList model){
         this.file = file;
         this.model = model;
     }

@@ -1,22 +1,28 @@
 package bme.creditcalc;
 
-import javax.swing.*;
 import java.util.Objects;
 
 public class Subject {
     private String name;
     private double credit;
     private int grade;
+    //private boolean spec;
 
     public Subject(String name, double credit){
         this.name = name;
         this.credit = credit;
         this.grade = 0;
+        //this.spec = false;
     }
     public Subject(String name, double credit, int grade){
         this(name, credit);
         this.grade = grade;
     }
+    /*public Subject(String name, double credit, int grade, boolean spec){
+        this(name, credit, grade);
+        this.spec = spec;
+
+    }*/
     public double getCredit() {
         return credit;
     }
@@ -65,4 +71,8 @@ public class Subject {
     public int getGrade() {
         return grade;
     }
+
+    /*public boolean getSpec(){
+        return spec;
+    }*/
 }

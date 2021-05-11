@@ -1,16 +1,16 @@
 package bme.creditcalc.ui;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class PopupListener extends MouseAdapter {
-    JPopupMenu popupToShow;
-    Window window;
+    private JPopupMenu popupToShow;
+    private Point lastPopupLocation;
 
-    public PopupListener(JPopupMenu jpopupmenu, Window window){
+    public PopupListener(JPopupMenu jpopupmenu){
         popupToShow = jpopupmenu;
-        this.window = window;
     }
     public void mousePressed(MouseEvent e) {
         popup(e);
@@ -23,7 +23,11 @@ public class PopupListener extends MouseAdapter {
     private void popup(MouseEvent e) {
         if (e.isPopupTrigger()) {
             popupToShow.show(e.getComponent(), e.getX(), e.getY());
-            window.updatePopupLocation(e.getPoint());
+            lastPopupLocation = e.getPoint();
         }
+    }
+
+    public Point getLastPopupLocation() {
+        return lastPopupLocation;
     }
 }

@@ -1,10 +1,6 @@
 package bme.creditcalc;
 
-import bme.creditcalc.Subject;
-
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import java.util.*;
 
 public class Semester extends AbstractTableModel {
@@ -59,13 +55,7 @@ public class Semester extends AbstractTableModel {
     }
 
     public double calculateAverage(){
-        double sumGradeTimesCredit = 0;
-        double sumCredit = 0;
-        for(Subject s : subjects){
-            sumGradeTimesCredit += s.getCredit() * s.getGrade();
-            sumCredit += s.getCredit();
-        }
-        return sumGradeTimesCredit / sumCredit;
+        return sumGradeCredit() / sumCredit();
     }
 
     public double calculateCreditIndex(){
@@ -74,6 +64,22 @@ public class Semester extends AbstractTableModel {
             sumGradeTimesCredit += s.getCredit() * s.getGrade();
         }
         return sumGradeTimesCredit / 30;
+    }
+
+    public double sumGradeCredit(){
+        double sumGrade = 0;
+        for(Subject s : subjects){
+            sumGrade += s.getGrade() * s.getCredit();
+        }
+        return sumGrade;
+    }
+
+    public double sumCredit(){
+        double sumCredit = 0;
+        for(Subject s : subjects){
+            sumCredit += s.getCredit();
+        }
+        return sumCredit;
     }
 
     @Override
@@ -145,5 +151,29 @@ public class Semester extends AbstractTableModel {
     @Override
     public String toString() {
         return date.toString();
+    }
+
+    public static double creditIndexAverages(Semester[] semesters){
+        double result = 0;
+        for(int i = 0; i < semesters.length; ++i){
+            if(semesters[i] == null){
+                return Double.NaN;
+            }
+            result += semesters[i].calculateCreditIndex();
+        }
+        return result / semesters.length;
+    }
+
+    public static Semester[] find2MostRecentSemesters(Semester[] semesters) {
+        Semester[] result = new Semester[2];
+        for (int i = 0; i < semesters.length; ++i) {
+            if (result[0] == null || SemesterDate.compare(semesters[i].getDate(), result[0].getDate()) > 0) {
+                result[1] = result[0];
+                result[0] = semesters[i];
+            } else if (result[1] == null || SemesterDate.compare(semesters[i].getDate(), result[1].getDate()) > 0) {
+                result[1] = semesters[i];
+            }
+        }
+        return result;
     }
 }
