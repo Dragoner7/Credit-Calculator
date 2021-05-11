@@ -3,7 +3,7 @@
 ### Mi ez?
 Egy átlagszámoló BME-seknek, azon belül is VIK-eseknek.
 
-### Nem vagyok se VIk-es, se BME-s, nekem hasznos?
+### Nem vagyok se VIK-es, se BME-s, nekem hasznos?
 Ha úgy számoljátok az átlagokat mint mi, akkor igen.
 
 ### Mivel tud többet mint az xyz oldal/én programom/egy számlológép?
