@@ -6,13 +6,15 @@ import bme.creditcalc.neptunreader.NeptunReader;
 import bme.creditcalc.SemesterList;
 
 import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Window extends JFrame {
+public class Window extends JFrame{
     private final JPanel mainPanel;
     private SemesterList semesters = new SemesterList();
     private JTable table;
@@ -36,6 +38,27 @@ public class Window extends JFrame {
         infoPanel.add(averageLabel);
         infoPanel.add(creditIndexLabel);
         mainPanel.add(infoPanel, BorderLayout.SOUTH);
+
+        semesters.addListDataListener(new ListDataListener() {
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+                update();
+            }
+
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+                update();
+            }
+
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                update();
+            }
+            public void update(){
+                updateTableModel();
+                updateAverages();
+            }
+        });
 
         initializeMenu();
         initializeTable();

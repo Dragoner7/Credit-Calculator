@@ -76,8 +76,9 @@ public class SemesterList implements MutableComboBoxModel<Semester> {
     @Override
     public void removeElement(Object obj) {
         if(obj instanceof Semester){
+            int indx = semesters.indexOf(obj);
             semesters.remove(obj);
-            listeners.forEach(e-> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, semesters.indexOf(obj), semesters.indexOf(obj))));
+            listeners.forEach(e-> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, indx, indx)));
         }
         if(!semesters.contains(selected)){
             selected = null;
