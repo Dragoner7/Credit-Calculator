@@ -20,6 +20,7 @@ public class Window extends JFrame{
     private final JPanel mainPanel;
     private SemesterList semesters = new SemesterList();
     private JTable table;
+    private JLabel creditLabel;
     private JLabel averageLabel;
     private JLabel creditIndexLabel;
 
@@ -37,6 +38,8 @@ public class Window extends JFrame{
         JPanel infoPanel = new JPanel();
         averageLabel = new JLabel();
         creditIndexLabel = new JLabel();
+        creditLabel = new JLabel();
+        infoPanel.add(creditLabel);
         infoPanel.add(averageLabel);
         infoPanel.add(creditIndexLabel);
         mainPanel.add(infoPanel, BorderLayout.SOUTH);
@@ -149,9 +152,11 @@ public class Window extends JFrame{
     private void updateAverages(){
         Semester selected = (Semester) semesters.getSelectedItem();
         if(selected != null) {
+            creditLabel.setText("Credits: " + selected.sumCredit());
             averageLabel.setText("Average: " + selected.calculateAverage());
             creditIndexLabel.setText("CreditIndex: " + selected.calculateCreditIndex());
         } else {
+            creditLabel.setText("Credits:");
             averageLabel.setText("Average:");
             creditIndexLabel.setText("CreditIndex:");
         }
