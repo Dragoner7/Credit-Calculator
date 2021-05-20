@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 
 public class NeptunReader extends SwingWorker<Semester, Object> {
     File file;
@@ -24,11 +25,18 @@ public class NeptunReader extends SwingWorker<Semester, Object> {
     }
     private Semester readXLSX() throws IOException {
         //File excelFile = new File(path);
+        if(!(new XLSXFileFilter()).accept(file)){
+            return null;
+        }
         FileInputStream fis = new FileInputStream(file);
-
         XSSFWorkbook workbook = new XSSFWorkbook(fis);
         XSSFSheet sheet = workbook.getSheetAt(0);
         String date = workbook.getSheetName(0);
+        Iterator<Row> rowIt = sheet.iterator();
+
+        if(!basicFormatCheck(rowIt.next())){
+            return null;
+        }
         Semester result = new Semester(Integer.parseInt(date.substring(date.length() -7, date.length() - 3)) , Integer.parseInt(date.substring(date.length() -1)));
         for(int i = 0; i < model.getSize(); ++i){
             if(result.equals(model.getElementAt(i))){
@@ -37,9 +45,6 @@ public class NeptunReader extends SwingWorker<Semester, Object> {
                 return null;
             }
         }
-        // we iterate on rows
-        Iterator<Row> rowIt = sheet.iterator();
-        rowIt.next();
 
         while(rowIt.hasNext()) {
             Row row = rowIt.next();
@@ -83,5 +88,11 @@ public class NeptunReader extends SwingWorker<Semester, Object> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected boolean basicFormatCheck(Row header){
+        return header.getCell(1).toString().contains("Tárgy") &&
+                header.getCell(2).toString().contains("Kr.") &&
+                header.getCell(7).toString().contains("Jegyek");
     }
 }

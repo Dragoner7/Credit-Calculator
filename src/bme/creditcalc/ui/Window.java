@@ -4,10 +4,12 @@ import bme.creditcalc.Semester;
 import bme.creditcalc.Subject;
 import bme.creditcalc.neptunreader.NeptunReader;
 import bme.creditcalc.SemesterList;
+import bme.creditcalc.neptunreader.XLSXFileFilter;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
@@ -193,6 +195,7 @@ public class Window extends JFrame{
 
     private void loadSemester() {
         JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+        fc.setFileFilter(new XLSXFileFilter());
         //fc.changeToParentDirectory();
         int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
