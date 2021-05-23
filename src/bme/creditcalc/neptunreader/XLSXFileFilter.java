@@ -6,7 +6,7 @@ import java.io.File;
 public class XLSXFileFilter extends FileFilter {
     @Override
     public boolean accept(File f) {
-        return f.getName().contains(".xlsx");
+        return f.isDirectory() || f.getName().contains(".xlsx");
     }
 
     @Override
