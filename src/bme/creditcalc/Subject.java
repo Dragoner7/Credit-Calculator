@@ -6,23 +6,23 @@ public class Subject {
     private String name;
     private double credit;
     private int grade;
-    //private boolean spec;
+    private boolean minta;
 
     public Subject(String name, double credit){
         this.name = name;
         this.credit = credit;
         this.grade = 0;
-        //this.spec = false;
+        this.minta = true;
     }
     public Subject(String name, double credit, int grade){
         this(name, credit);
         this.grade = grade;
     }
-    /*public Subject(String name, double credit, int grade, boolean spec){
+    public Subject(String name, double credit, int grade, boolean minta){
         this(name, credit, grade);
-        this.spec = spec;
+        this.minta = minta;
 
-    }*/
+    }
     public double getCredit() {
         return credit;
     }
@@ -72,7 +72,10 @@ public class Subject {
         return grade;
     }
 
-    /*public boolean getSpec(){
-        return spec;
-    }*/
+    public boolean getMinta(){
+        return minta;
+    }
+    public void setMinta(boolean minta){
+        this.minta = minta;
+    }
 }

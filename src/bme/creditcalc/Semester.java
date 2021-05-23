@@ -55,7 +55,7 @@ public class Semester extends AbstractTableModel {
     }
 
     public double calculateAverage(){
-        return sumGradeCredit() / sumCredit();
+        return sumGradeCredit(false) / sumCredit(false);
     }
 
     public double calculateCreditIndex(){
@@ -66,18 +66,22 @@ public class Semester extends AbstractTableModel {
         return sumGradeTimesCredit / 30;
     }
 
-    public double sumGradeCredit(){
+    public double sumGradeCredit(boolean checkMinta){
         double sumGrade = 0;
         for(Subject s : subjects){
-            sumGrade += s.getGrade() * s.getCredit();
+            if(!checkMinta || s.getMinta()) {
+                sumGrade += s.getGrade() * s.getCredit();
+            }
         }
         return sumGrade;
     }
 
-    public double sumCredit(){
+    public double sumCredit(boolean checkMinta){
         double sumCredit = 0;
         for(Subject s : subjects){
-            sumCredit += s.getCredit();
+            if(!checkMinta || s.getMinta()){
+                sumCredit += s.getCredit();
+            }
         }
         return sumCredit;
     }
@@ -89,7 +93,7 @@ public class Semester extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -101,6 +105,8 @@ public class Semester extends AbstractTableModel {
                 return "Credit";
             case 2:
                 return "Grade";
+            case 3:
+                return "Minta";
         }
         return super.getColumnName(column);
     }
@@ -114,6 +120,8 @@ public class Semester extends AbstractTableModel {
                 return subjects.get(rowIndex).getCredit();
             case 2:
                 return subjects.get(rowIndex).getGrade();
+            case 3:
+                return subjects.get(rowIndex).getMinta();
             default:
                 return null;
         }
@@ -143,6 +151,9 @@ public class Semester extends AbstractTableModel {
                 subjects.get(rowIndex).setGrade(Integer.parseInt((String)aValue));
                 this.fireTableRowsUpdated(rowIndex, rowIndex);
                 break;
+            case 3:
+                subjects.get(rowIndex).setMinta(Boolean.parseBoolean((String)aValue));
+                this.fireTableRowsUpdated(rowIndex, rowIndex);
             default:
                 break;
         }

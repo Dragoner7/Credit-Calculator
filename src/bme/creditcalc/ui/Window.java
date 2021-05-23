@@ -138,6 +138,25 @@ public class Window extends JFrame{
         calculateMenu.add(calculateCollagePointsMenuItem);
 
         calculateCollagePointsMenuItem.addActionListener(e -> calculateCollageDialog());
+
+        JMenuItem specMenuItem = new JMenuItem("Optimal Spec");
+
+        calculateMenu.add(specMenuItem);
+        specMenuItem.addActionListener(e->calculateOptimalSpec());
+    }
+
+    private void calculateOptimalSpec(){
+        double sumGradexCredit = 0;
+        double sumCredit = 0;
+        boolean is120 = true;
+        for(Semester semester : semesters.toArray()){
+            sumGradexCredit += semester.sumGradeCredit(true);
+            sumCredit += semester.sumCredit(true);
+        }
+        if(sumCredit != 120){
+            is120 = false;
+        }
+        JOptionPane.showMessageDialog(this, "Spec average: " + sumGradexCredit / sumCredit + "\n Credits count? " + sumCredit);
     }
 
     private void updateTableModel(){
@@ -152,7 +171,7 @@ public class Window extends JFrame{
     private void updateAverages(){
         Semester selected = (Semester) semesters.getSelectedItem();
         if(selected != null) {
-            creditLabel.setText("Credits: " + selected.sumCredit());
+            creditLabel.setText("Credits: " + selected.sumCredit(false));
             averageLabel.setText("Average: " + selected.calculateAverage());
             creditIndexLabel.setText("CreditIndex: " + selected.calculateCreditIndex());
         } else {
