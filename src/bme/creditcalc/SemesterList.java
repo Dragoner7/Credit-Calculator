@@ -24,6 +24,7 @@ public class SemesterList implements MutableComboBoxModel<Semester> {
         if(anItem instanceof Semester && semesters.contains(anItem)){
             selected = (Semester) anItem;
         }
+        notifySelectedChangeListeners();
     }
 
     @Override
