@@ -1,4 +1,4 @@
-package bme.creditcalc;
+package bme.creditcalc.ui;
 
 import bme.creditcalc.model.Semester;
 

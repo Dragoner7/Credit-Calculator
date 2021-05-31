@@ -1,7 +1,5 @@
 package bme.creditcalc.model;
 
-import bme.creditcalc.SemesterDate;
-
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
 

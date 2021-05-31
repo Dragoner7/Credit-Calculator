@@ -1,8 +1,5 @@
 package bme.creditcalc.ui;
 
-import bme.creditcalc.SemesterTable;
-import bme.creditcalc.model.Semester;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;

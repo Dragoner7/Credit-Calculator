@@ -1,6 +1,5 @@
 package bme.creditcalc.ui;
 
-import bme.creditcalc.SemesterTable;
 import bme.creditcalc.model.Semester;
 import bme.creditcalc.model.Subject;
 import bme.creditcalc.neptunreader.NeptunReader;

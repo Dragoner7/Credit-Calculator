@@ -1,4 +1,4 @@
-package bme.creditcalc;
+package bme.creditcalc.model;
 
 import java.util.Objects;
 
