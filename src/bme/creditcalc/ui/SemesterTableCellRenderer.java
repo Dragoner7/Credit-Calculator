@@ -1,6 +1,7 @@
 package bme.creditcalc.ui;
 
-import bme.creditcalc.Semester;
+import bme.creditcalc.SemesterTable;
+import bme.creditcalc.model.Semester;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -15,7 +16,7 @@ public class SemesterTableCellRenderer extends DefaultTableCellRenderer {
         } else {
             c.setForeground(table.getForeground());
         }
-        if(((Semester)table.getModel()).getSubject(row).isFinalized()){
+        if(((SemesterTable)table.getModel()).getSemester().getSubject(row).isFinalized()){
             c.setBackground(Color.green);
         } else {
             c.setBackground(table.getBackground());

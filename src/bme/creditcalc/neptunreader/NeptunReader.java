@@ -5,21 +5,21 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
-import bme.creditcalc.Semester;
-import bme.creditcalc.Subject;
-import bme.creditcalc.SemesterList;
+import bme.creditcalc.model.Semester;
+import bme.creditcalc.model.Subject;
+import bme.creditcalc.model.Leckekonyv;
+import bme.creditcalc.ui.Window;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 
 public class NeptunReader extends SwingWorker<Semester, Object> {
     File file;
-    SemesterList model;
+    Leckekonyv model;
 
-    public NeptunReader(File file, SemesterList model){
+    public NeptunReader(File file, Leckekonyv model){
         this.file = file;
         this.model = model;
     }
@@ -84,7 +84,7 @@ public class NeptunReader extends SwingWorker<Semester, Object> {
             if(get() == null){
                 return;
             }
-            model.addElement(get());
+            Window.getInstance().addSemester(get());
         } catch (Exception e) {
             e.printStackTrace();
         }

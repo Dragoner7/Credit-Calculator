@@ -13,8 +13,6 @@ public class Main {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        Window window = new Window();
-        window.pack();
-        window.setVisible(true);
+        Window.getInstance().setVisible(true);
     }
 }

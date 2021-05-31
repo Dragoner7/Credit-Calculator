@@ -1,15 +1,15 @@
 package bme.creditcalc.ui;
 
-import bme.creditcalc.Semester;
-import bme.creditcalc.Subject;
+import bme.creditcalc.SemesterTable;
+import bme.creditcalc.model.Semester;
+import bme.creditcalc.model.Subject;
 import bme.creditcalc.neptunreader.NeptunReader;
-import bme.creditcalc.SemesterList;
+import bme.creditcalc.model.Leckekonyv;
 import bme.creditcalc.neptunreader.XLSXFileFilter;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
@@ -17,22 +17,26 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Window extends JFrame{
+
+    private static Window instance = new Window();
+    public static Window getInstance(){
+        return instance;
+    }
+
     private final JPanel mainPanel;
-    private SemesterList semesters = new SemesterList();
+    private Leckekonyv leckekonyv = new Leckekonyv();
     private JTable table;
     private JLabel creditLabel;
     private JLabel averageLabel;
     private JLabel creditIndexLabel;
 
-    private double tk = 4;
-    private double plusPoints = 0;
-
-    public Window(){
+    protected Window(){
         super("Credit Calculator");
         mainPanel = new JPanel(new BorderLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().add(mainPanel, BorderLayout.CENTER);
         initializeWindow();
+        pack();
     }
     private void initializeWindow(){
         JPanel infoPanel = new JPanel();
@@ -44,7 +48,7 @@ public class Window extends JFrame{
         infoPanel.add(creditIndexLabel);
         mainPanel.add(infoPanel, BorderLayout.SOUTH);
 
-        semesters.addListDataListener(new ListDataListener() {
+        leckekonyv.addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
                 update();
@@ -92,22 +96,21 @@ public class Window extends JFrame{
     }
     private void initializeComboBox(){
         JPanel topPanel = new JPanel();
-        JComboBox<Semester> comboBox = new JComboBox<>(semesters);
+        JComboBox<Semester> comboBox = new JComboBox<>(leckekonyv);
         Dimension dim = comboBox.getPreferredSize();
         dim.width = 400;
         comboBox.setPreferredSize(dim);
         topPanel.add(comboBox);
 
-        //updateTableModel();
-        //comboBox.addActionListener(e -> updateTableModel());
-        semesters.addSelectedChangedListener(e -> updateTableModel());
+        leckekonyv.addSelectedChangedListener(e -> updateTableModel());
+        //leckekonyv.addSelectedChangedListener(e->comboBox.invalidate());
 
         JButton newButton = new JButton("New");
         topPanel.add(newButton);
         newButton.addActionListener(e->addSemesterDialog());
         JButton deleteButton = new JButton("Delete");
         topPanel.add(deleteButton);
-        deleteButton.addActionListener(e->deleteSemester());
+        deleteButton.addActionListener(e->deleteLastSemester());
         mainPanel.add(topPanel, BorderLayout.NORTH);
     }
     private void initializeMenu(){
@@ -121,7 +124,7 @@ public class Window extends JFrame{
         JMenuItem removeSubjectMenuItem = new JMenuItem("Remove");
         subjectsMenu.add(removeSubjectMenuItem);
 
-        addSubjectMenuItem.addActionListener(e-> addSubject());
+        addSubjectMenuItem.addActionListener(e-> addNewSubject());
         removeSubjectMenuItem.addActionListener(e-> deleteSubject(Integer.parseInt((String) JOptionPane.showInputDialog(
                 this,
                 "Which subject to delete (row number):",
@@ -141,16 +144,17 @@ public class Window extends JFrame{
     }
 
     private void updateTableModel(){
-        Semester selected = (Semester) semesters.getSelectedItem();
+        Semester selected = (Semester) leckekonyv.getSelectedItem();
         if(selected != null){
-            table.setModel(selected);
+            table.setModel(selected.getView());
         } else {
             table.setModel(new DefaultTableModel());
         }
         updateAverages();
+
     }
     private void updateAverages(){
-        Semester selected = (Semester) semesters.getSelectedItem();
+        Semester selected = (Semester) leckekonyv.getSelectedItem();
         if(selected != null) {
             creditLabel.setText("Credits: " + selected.sumCredit());
             averageLabel.setText("Average: " + selected.calculateAverage());
@@ -168,34 +172,45 @@ public class Window extends JFrame{
         for(int i = now.getYear() - 10; i < now.getYear() + 10;++i){
             years.add(i);
         }
-        int selectedYear = (Integer) JOptionPane.showInputDialog(
-                this,
-                "Choose year",
-                "Choose year",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                years.toArray(),
-                now.getYear()
-        );
-        String[] options = {"Winter",
-                "Spring"};
-        int selectedSemester = JOptionPane.showOptionDialog(
-                this,
-                "Select season",
-                "Select season",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]
-        ) + 1;
-        semesters.addElement(new Semester(selectedYear, selectedSemester));
-        //updateTableModel();
+        try{
+            int selectedYear = (Integer) JOptionPane.showInputDialog(
+                    this,
+                    "Choose year",
+                    "Choose year",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    years.toArray(),
+                    now.getYear()
+            );
+            String[] options = {"Winter",
+                    "Spring"};
+            int selectedSemester = JOptionPane.showOptionDialog(
+                    this,
+                    "Select season",
+                    "Select season",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            ) + 1;
+            if(selectedSemester < 1 || selectedSemester > 2){
+                throw new NullPointerException();
+            }
+            addSemester(new Semester(selectedYear, selectedSemester));
+        } catch (NullPointerException ignored){}
+
     }
 
-    private void deleteSemester(){
-        semesters.removeElement(semesters.getSelectedItem());
-        //updateTableModel();
+    public void deleteLastSemester(){
+        leckekonyv.removeElement(leckekonyv.getSelectedItem());
+    }
+
+    public void addSemester(Semester semester){
+        SemesterTable semesterTable = new SemesterTable();
+        semester.attachView(semesterTable);
+        semesterTable.setModel(semester);
+        leckekonyv.addElement(semester);
     }
 
     private void loadSemester() {
@@ -205,35 +220,35 @@ public class Window extends JFrame{
         int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            (new NeptunReader(file, semesters)).execute();
+            (new NeptunReader(file, leckekonyv)).execute();
         }
         //updateTableModel();
     }
 
-    private void addSubject(){
-        Semester currentSemester = (Semester)semesters.getSelectedItem();
+    public void addNewSubject(){
+        Semester currentSemester = (Semester) leckekonyv.getSelectedItem();
         if(currentSemester != null){
             currentSemester.addSubject(new Subject("New Subject", 0, 1));
         }
     }
 
     private void addSubject(int row){
-        Semester currentSemester = (Semester)semesters.getSelectedItem();
+        Semester currentSemester = (Semester) leckekonyv.getSelectedItem();
         if(currentSemester != null){
             currentSemester.addSubjectAt(row, new Subject("New Subject", 0, 1));
         }
     }
 
-    private void deleteSubject(int row){
-        Semester currentSemester = (Semester)semesters.getSelectedItem();
+    public void deleteSubject(int row){
+        Semester currentSemester = (Semester) leckekonyv.getSelectedItem();
         if(currentSemester != null){
             currentSemester.removeSubjectAt(row);
         }
     }
 
     private void calculateCollageDialog(){
-        Semester[] recent2 = Semester.find2MostRecentSemesters(semesters.toArray());
-        double a = Semester.creditIndexAverages(recent2);
+        double tk = 4;
+        double plusPoints = 0;
         try{
             tk = Double.parseDouble((String) JOptionPane.showInputDialog(
                     this,
@@ -253,7 +268,7 @@ public class Window extends JFrame{
                     null,
                     plusPoints
             ));
-            double points = (a - 2.0)/ ( (tk - 2.0) / 100 ) + plusPoints;
+            double points = leckekonyv.collagePoints(tk, plusPoints);
             JOptionPane.showMessageDialog(this, "Your collage points: " + points);
         }catch (Exception ignored){ }
     }

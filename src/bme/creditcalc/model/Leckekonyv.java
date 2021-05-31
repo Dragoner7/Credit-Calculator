@@ -1,4 +1,7 @@
-package bme.creditcalc;
+package bme.creditcalc.model;
+
+import bme.creditcalc.SemesterDate;
+import bme.creditcalc.model.Semester;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -7,13 +10,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class SemesterList implements MutableComboBoxModel<Semester> {
+public class Leckekonyv implements MutableComboBoxModel<Semester> {
     ArrayList<Semester> semesters;
     ArrayList<ListDataListener> listeners;
     ArrayList<ActionListener> selectedChangeListeners;
     Semester selected;
 
-    public SemesterList() {
+    public Leckekonyv() {
         this.semesters = new ArrayList<>();
         this.listeners = new ArrayList<>();
         this.selectedChangeListeners = new ArrayList<>();
@@ -68,9 +71,8 @@ public class SemesterList implements MutableComboBoxModel<Semester> {
     public void addElement(Semester item) {
         semesters.add(item);
         if(semesters.contains(item)){
+            setSelectedItem(item);
             listeners.forEach(e-> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, semesters.indexOf(item), semesters.indexOf(item))));
-            selected = item;
-            notifySelectedChangeListeners();
         }
     }
 
@@ -108,5 +110,18 @@ public class SemesterList implements MutableComboBoxModel<Semester> {
     }
     public Semester[] toArray(){
         return semesters.toArray(new Semester[0]);
+    }
+
+    public Semester[] findMostRecent(int n){
+        ArrayList<Semester> sorted = (ArrayList<Semester>) semesters.subList(0, semesters.size());
+        sorted.sort((e1, e2)-> SemesterDate.compare(e1.getDate(), e2.getDate()));
+        ArrayList<Semester> cropped = (ArrayList<Semester>) sorted.subList(0, n);
+        return (Semester[]) cropped.toArray();
+    }
+
+    public double collagePoints(double tk, double plusPoints){
+        Semester[] recent2 = findMostRecent(2);
+        double a = Semester.creditIndexAverages(recent2);
+        return (a - 2.0)/ ( (tk - 2.0) / 100 ) + plusPoints;
     }
 }
