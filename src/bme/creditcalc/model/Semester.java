@@ -79,8 +79,8 @@ public class Semester {
         return view;
     }
 
-    public double calculateAverage(){
-        return sumGradeCredit() / sumCredit();
+    public double calculateAverage(boolean mintaOnly, boolean finalizedOnly){
+        return sumGradeCredit(mintaOnly, finalizedOnly) / sumCredit(mintaOnly, finalizedOnly);
     }
 
     public double calculateCreditIndex(){
@@ -91,18 +91,22 @@ public class Semester {
         return sumGradeTimesCredit / 30;
     }
 
-    public double sumGradeCredit(){
+    public double sumGradeCredit(boolean mintaOnly, boolean finalizedOnly){
         double sumGrade = 0;
         for(Subject s : subjects){
-            sumGrade += s.getGrade() * s.getCredit();
+            if((!mintaOnly || s.getMinta()) && (!finalizedOnly || s.isFinalized())){
+                sumGrade += s.getGrade() * s.getCredit();
+            }
         }
         return sumGrade;
     }
 
-    public double sumCredit(){
+    public double sumCredit(boolean mintaOnly, boolean finalizedOnly){
         double sumCredit = 0;
         for(Subject s : subjects){
-            sumCredit += s.getCredit();
+            if((!mintaOnly || s.getMinta()) && (!finalizedOnly || s.isFinalized())) {
+                sumCredit += s.getCredit();
+            }
         }
         return sumCredit;
     }

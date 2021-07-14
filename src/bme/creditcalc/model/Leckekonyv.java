@@ -6,6 +6,7 @@ import javax.swing.event.ListDataListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Leckekonyv implements MutableComboBoxModel<Semester> {
     ArrayList<Semester> semesters;
@@ -110,15 +111,31 @@ public class Leckekonyv implements MutableComboBoxModel<Semester> {
     }
 
     public Semester[] findMostRecent(int n){
-        ArrayList<Semester> sorted = (ArrayList<Semester>) semesters.subList(0, semesters.size());
-        sorted.sort((e1, e2)-> SemesterDate.compare(e1.getDate(), e2.getDate()));
-        ArrayList<Semester> cropped = (ArrayList<Semester>) sorted.subList(0, n);
-        return (Semester[]) cropped.toArray();
+        List<Semester> sorted = (List<Semester>) semesters.subList(0, semesters.size());
+        sorted.sort((e1, e2)-> SemesterDate.compare(e2.getDate(), e1.getDate()));
+        List<Semester> cropped = (List<Semester>) sorted.subList(0, n);
+        return (Semester[]) cropped.toArray(new Semester[cropped.size()]);
     }
 
     public double collagePoints(double tk, double plusPoints){
         Semester[] recent2 = findMostRecent(2);
         double a = Semester.creditIndexAverages(recent2);
         return (a - 2.0)/ ( (tk - 2.0) / 100 ) + plusPoints;
+    }
+
+    public static double sumCreditGrade(Semester[] semesters, boolean mintaOnly, boolean finalizedOnly){
+        double sumCreditGrade = 0;
+        for(Semester s : semesters){
+            sumCreditGrade += s.sumGradeCredit(mintaOnly, finalizedOnly);
+        }
+        return sumCreditGrade;
+    }
+
+    public static double sumCredit(Semester[] semesters, boolean mintaOnly, boolean finalizedOnly){
+        double sumCredit = 0;
+        for(Semester s : semesters){
+            sumCredit += s.sumCredit(mintaOnly, finalizedOnly);
+        }
+        return sumCredit;
     }
 }

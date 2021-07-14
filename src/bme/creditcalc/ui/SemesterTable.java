@@ -23,7 +23,7 @@ public class SemesterTable extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -35,6 +35,8 @@ public class SemesterTable extends AbstractTableModel {
                 return "Credit";
             case 2:
                 return "Grade";
+            case 3:
+                return "Minta";
         }
         return super.getColumnName(column);
     }
@@ -48,6 +50,8 @@ public class SemesterTable extends AbstractTableModel {
                 return semester.getSubjects().get(rowIndex).getCredit();
             case 2:
                 return semester.getSubjects().get(rowIndex).getGrade();
+            case 3:
+                return semester.getSubjects().get(rowIndex).getMinta();
             default:
                 return null;
         }
@@ -65,16 +69,35 @@ public class SemesterTable extends AbstractTableModel {
     }
 
     @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        switch (columnIndex){
+            case 0:
+                return String.class;
+            case 1:
+                return Double.class;
+            case 2:
+                return Integer.class;
+            case 3:
+                return Boolean.class;
+        }
+        return Object.class;
+    }
+
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         switch (columnIndex){
             case 0:
                 semester.getSubjects().get(rowIndex).setName((String) aValue);
                 break;
             case 1:
-                semester.getSubjects().get(rowIndex).setCredit(Double.parseDouble((String) aValue));
+                semester.getSubjects().get(rowIndex).setCredit((Double) aValue);
                 break;
             case 2:
-                semester.getSubjects().get(rowIndex).setGrade(Integer.parseInt((String)aValue));
+                semester.getSubjects().get(rowIndex).setGrade((Integer) aValue);
+                this.fireTableRowsUpdated(rowIndex, rowIndex);
+                break;
+            case 3:
+                semester.getSubjects().get(rowIndex).setMinta((Boolean) aValue);
                 this.fireTableRowsUpdated(rowIndex, rowIndex);
                 break;
             default:

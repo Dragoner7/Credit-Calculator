@@ -9,6 +9,7 @@ import bme.creditcalc.neptunreader.XLSXFileFilter;
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
@@ -35,6 +36,7 @@ public class Window extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().add(mainPanel, BorderLayout.CENTER);
         initializeWindow();
+        setResizable(false);
         pack();
     }
     private void initializeWindow(){
@@ -75,7 +77,10 @@ public class Window extends JFrame{
     }
     private void initializeTable(){
         table = new JTable(null);
-        table.setDefaultRenderer(Object.class, new SemesterTableCellRenderer());
+        table.setDefaultRenderer(String.class, new SemesterTableCellRenderer(table.getDefaultRenderer(String.class)));
+        table.setDefaultRenderer(Integer.class, new SemesterTableCellRenderer(table.getDefaultRenderer(Integer.class)));
+        table.setDefaultRenderer(Boolean.class, new SemesterTableCellRenderer(table.getDefaultRenderer(Boolean.class)));
+        table.setDefaultRenderer(Double.class, new SemesterTableCellRenderer(table.getDefaultRenderer(Double.class)));
         JScrollPane scrollPane = new JScrollPane(table);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -140,6 +145,14 @@ public class Window extends JFrame{
         calculateMenu.add(calculateCollagePointsMenuItem);
 
         calculateCollagePointsMenuItem.addActionListener(e -> calculateCollageDialog());
+
+        JMenuItem AdvancedCalculatorMenuItem = new JMenuItem("Advanced");
+        calculateMenu.add(AdvancedCalculatorMenuItem);
+
+        AdvancedCalculatorMenuItem.addActionListener(e -> {
+            AdvancedCalculator dialog = new AdvancedCalculator(this);
+            dialog.setVisible(true);
+        });
     }
 
     private void updateTableModel(){
@@ -155,8 +168,8 @@ public class Window extends JFrame{
     private void updateAverages(){
         Semester selected = (Semester) leckekonyv.getSelectedItem();
         if(selected != null) {
-            creditLabel.setText("Credits: " + selected.sumCredit());
-            averageLabel.setText("Average: " + selected.calculateAverage());
+            creditLabel.setText("Credits: " + selected.sumCredit(false, false));
+            averageLabel.setText("Average: " + selected.calculateAverage(false, false));
             creditIndexLabel.setText("CreditIndex: " + selected.calculateCreditIndex());
         } else {
             creditLabel.setText("Credits:");
@@ -292,5 +305,9 @@ public class Window extends JFrame{
                 loadSemester();
                 break;
         }
+    }
+
+    public Leckekonyv getLeckekonyv() {
+        return leckekonyv;
     }
 }
