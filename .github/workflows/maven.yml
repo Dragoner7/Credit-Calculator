@@ -28,5 +28,4 @@ jobs:
       with:
         artifacts: "target/*.jar"
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: "${{GITHUB_SHA}}"
         prerelease: true
