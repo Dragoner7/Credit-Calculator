@@ -3,11 +3,10 @@
 
 name: Java CI with Maven
 
-on:
+on: 
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+    - '*'
 
 jobs:
   build:
@@ -31,4 +30,3 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         name: "${{GITHUB_SHA}}"
         prerelease: true
-        tag: pre-release
