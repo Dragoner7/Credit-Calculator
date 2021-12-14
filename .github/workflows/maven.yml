@@ -28,4 +28,3 @@ jobs:
       with:
         artifacts: "target/*.jar"
         token: ${{ secrets.GITHUB_TOKEN }}
-        prerelease: true
