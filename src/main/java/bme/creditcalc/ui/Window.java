@@ -152,6 +152,7 @@ public class Window extends JFrame{
         AdvancedCalculatorMenuItem.addActionListener(e -> {
             AdvancedCalculator dialog = new AdvancedCalculator(this);
             dialog.setVisible(true);
+            dialog.setLocationRelativeTo(this);
         });
     }
 
