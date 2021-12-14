@@ -5,6 +5,8 @@ import bme.creditcalc.model.Subject;
 import bme.creditcalc.neptunreader.NeptunReader;
 import bme.creditcalc.model.Leckekonyv;
 import bme.creditcalc.neptunreader.XLSXFileFilter;
+import com.github.weisj.darklaf.LafManager;
+import com.github.weisj.darklaf.theme.DarculaTheme;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -17,6 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Window extends JFrame{
+    public static final Color DONE_COLOR = new Color(0x368058);
 
     private static Window instance = new Window();
     public static Window getInstance(){
@@ -38,6 +41,7 @@ public class Window extends JFrame{
         initializeWindow();
         setResizable(false);
         pack();
+        LafManager.install(new DarculaTheme());
     }
     private void initializeWindow(){
         JPanel infoPanel = new JPanel();
