@@ -56,16 +56,10 @@ import org.apache.poi.xssf.usermodel.XSSFSheet
 import java.util.ArrayList
 
 class Leckekonyv : MutableComboBoxModel<Semester> {
-    var semesters: ArrayList<Semester?>
-    var listeners: ArrayList<ListDataListener>
-    var selectedChangeListeners: ArrayList<ActionListener>
-    var selected: Semester? = null
-
-    init {
-        semesters = ArrayList()
-        listeners = ArrayList()
-        selectedChangeListeners = ArrayList()
-    }
+    var semesters = mutableListOf<Semester>()
+    private var listeners = mutableListOf<ListDataListener>()
+    private var selectedChangeListeners = mutableListOf<ActionListener>()
+    private var selected: Semester? = null
 
     override fun setSelectedItem(anItem: Any) {
         if (anItem is Semester && semesters.contains(anItem)) {
@@ -74,8 +68,8 @@ class Leckekonyv : MutableComboBoxModel<Semester> {
         notifySelectedChangeListeners()
     }
 
-    override fun getSelectedItem(): Any {
-        return selected!!
+    override fun getSelectedItem(): Any? {
+        return selected
     }
 
     override fun getSize(): Int {
@@ -109,7 +103,7 @@ class Leckekonyv : MutableComboBoxModel<Semester> {
     override fun addElement(item: Semester) {
         semesters.add(item)
         if (semesters.contains(item)) {
-            selectedItem = item
+            selected = item
             listeners.forEach(Consumer { e: ListDataListener -> e.intervalAdded(ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, semesters.indexOf(item), semesters.indexOf(item))) })
         }
     }
@@ -149,14 +143,14 @@ class Leckekonyv : MutableComboBoxModel<Semester> {
     }
 
     fun findMostRecent(n: Int): Array<Semester?> {
-        val sorted = semesters.subList(0, semesters.size) as List<Semester?>
-        sorted.sort(java.util.Comparator { e1: Semester, e2: Semester -> SemesterDate.Companion.compare(e2.getDate(), e1.getDate()) })
+        val sorted = semesters.subList(0, semesters.size)
+        sorted.sortWith { e1: Semester, e2: Semester -> SemesterDate.compare(e2.date, e1.date) }
         return sorted.subList(0, n).toTypedArray()
     }
 
     fun collagePoints(tk: Double, plusPoints: Double): Double {
         val recent2 = findMostRecent(2)
-        val a: Double = Semester.Companion.creditIndexAverages(recent2)
+        val a: Double = Semester.creditIndexAverages(recent2)
         return (a - 2.0) / ((tk - 2.0) / 100) + plusPoints
     }
 

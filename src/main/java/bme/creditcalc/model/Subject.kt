@@ -55,8 +55,18 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import java.util.*
 
-class Subject(var name: String, var credit: Double) {
-    private var grade = 0
+data class Subject(var name: String, var credit: Double) {
+    var grade = 0
+        set(value) {
+            if (value > 5) {
+                field = 5
+                return
+            } else if (value < 0) {
+                field = 0
+                return
+            }
+            field = value
+        }
     var minta = true
 
     constructor(name: String, credit: Double, grade: Int) : this(name, credit) {
@@ -71,30 +81,13 @@ class Subject(var name: String, var credit: Double) {
         if (this === o) return true
         if (o == null || javaClass != o.javaClass) return false
         val subject = o as Subject
-        return java.lang.Double.compare(subject.credit, credit) == 0 && grade == subject.grade && name == subject.name
+        return subject.credit.compareTo(credit) == 0 && grade == subject.grade && name == subject.name
     }
 
     override fun hashCode(): Int {
         return Objects.hash(name, credit, grade)
     }
 
-    fun setGrade(grade: Int) {
-        //if(!finalized){
-        var grade = grade
-        if (grade > 5) {
-            grade = 5
-        } else if (grade < 0) {
-            grade = 0
-        }
-        this.grade = grade
-        //this.finalized = true;
-        //}
-    }
+    val isFinalized: Boolean get() = grade > 1
 
-    val isFinalized: Boolean
-        get() = grade > 1
-
-    fun getGrade(): Int {
-        return grade
-    }
 }

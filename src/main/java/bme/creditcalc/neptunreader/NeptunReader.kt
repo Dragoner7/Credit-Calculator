@@ -57,7 +57,6 @@ import java.io.File
 class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester?, Any?>() {
     @Throws(IOException::class)
     private fun readXLSX(): Semester? {
-        //File excelFile = new File(path);
         if (!XLSXFileFilter().accept(file)) {
             return null
         }
@@ -97,7 +96,7 @@ class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester
             if (get() == null) {
                 return
             }
-            Window.Companion.getInstance().addSemester(get())
+            Window.addSemester(get())
         } catch (e: Exception) {
             e.printStackTrace()
         }

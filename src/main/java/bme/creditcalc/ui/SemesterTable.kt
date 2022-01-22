@@ -83,29 +83,24 @@ class SemesterTable : AbstractTableModel() {
         return when (columnIndex) {
             0 -> semester!!.subjects[rowIndex].name
             1 -> semester!!.subjects[rowIndex].credit
-            2 -> semester!!.subjects[rowIndex]!!.grade
+            2 -> semester!!.subjects[rowIndex].grade
             3 -> semester!!.subjects[rowIndex].minta
-            else -> null
+            else -> semester!!.subjects[rowIndex].name
         }
     }
 
     override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean {
         return true
-        /*if(columnIndex > 1){
-            return true;
-            //return !subjects.get(rowIndex).isFinalized();
-        }
-        return false;*/
     }
 
     override fun getColumnClass(columnIndex: Int): Class<*> {
-        when (columnIndex) {
-            0 -> return String::class.java
-            1 -> return Double::class.java
-            2 -> return Int::class.java
-            3 -> return Boolean::class.java
+        return when (columnIndex) {
+            0 -> String::class.javaObjectType
+            1 -> Double::class.javaObjectType
+            2 -> Int::class.javaObjectType
+            3 -> Boolean::class.javaObjectType
+            else -> Any::class.javaObjectType
         }
-        return Any::class.java
     }
 
     override fun setValueAt(aValue: Any, rowIndex: Int, columnIndex: Int) {
@@ -113,7 +108,7 @@ class SemesterTable : AbstractTableModel() {
             0 -> semester!!.subjects[rowIndex].name = aValue as String
             1 -> semester!!.subjects[rowIndex].credit = aValue as Double
             2 -> {
-                semester!!.subjects[rowIndex]!!.grade = aValue as Int
+                semester!!.subjects[rowIndex].grade = aValue as Int
                 fireTableRowsUpdated(rowIndex, rowIndex)
             }
             3 -> {

@@ -55,14 +55,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 
 class AdvancedCalculator(parent: JFrame?) : JDialog(parent) {
-    var average: JLabel
-    var creditsCounted: JLabel
-    var mintaOnly: JCheckBox
-    var acquiredOnly: JCheckBox
-    var customDiv: JRadioButton
+    private var average: JLabel
+    private var creditsCounted: JLabel
+    private var mintaOnly: JCheckBox
+    private var acquiredOnly: JCheckBox
+    private var customDiv: JRadioButton
     var div: JTextField
-    var recentOnly: JRadioButton
-    var recentN: JTextField
+    private var recentOnly: JRadioButton
+    private var recentN: JTextField
 
     init {
         minimumSize = Dimension(500, 250)
@@ -80,11 +80,11 @@ class AdvancedCalculator(parent: JFrame?) : JDialog(parent) {
         add(acquiredPanel)
         val semestersPanel = JPanel()
         val allRB = JRadioButton("All Semesters")
-        allRB.addActionListener { e: ActionEvent? -> recentOnly.isSelected = false }
         allRB.isSelected = true
         semestersPanel.add(allRB)
         recentOnly = JRadioButton("Recents")
-        recentOnly.addActionListener { e: ActionEvent? -> allRB.isSelected = false }
+        recentOnly.addActionListener { allRB.isSelected = false }
+        allRB.addActionListener { recentOnly.isSelected = false }
         semestersPanel.add(recentOnly)
         recentN = JTextField()
         recentN.preferredSize = Dimension(25, 25)
@@ -93,11 +93,11 @@ class AdvancedCalculator(parent: JFrame?) : JDialog(parent) {
         add(semestersPanel)
         val customDivPanel = JPanel()
         val allCreditDiv = JRadioButton("Auto divider")
-        allCreditDiv.addActionListener { e: ActionEvent? -> customDiv.isSelected = false }
         allCreditDiv.isSelected = true
         customDivPanel.add(allCreditDiv)
         customDiv = JRadioButton("Custom divider:")
-        customDiv.addActionListener { e: ActionEvent? -> allCreditDiv.isSelected = false }
+        customDiv.addActionListener { allCreditDiv.isSelected = false }
+        allCreditDiv.addActionListener { customDiv.isSelected = false }
         customDivPanel.add(customDiv)
         div = JTextField()
         div.preferredSize = Dimension(25, 25)
@@ -105,7 +105,7 @@ class AdvancedCalculator(parent: JFrame?) : JDialog(parent) {
         customDivPanel.add(JLabel("credits"))
         add(customDivPanel)
         val calculateButton = JButton("Calculate")
-        calculateButton.addActionListener { e: ActionEvent? -> updateAverage() }
+        calculateButton.addActionListener { updateAverage() }
         add(calculateButton)
         val averagePanel = JPanel()
         averagePanel.add(calculateButton)
@@ -120,17 +120,16 @@ class AdvancedCalculator(parent: JFrame?) : JDialog(parent) {
 
     fun updateAverage() {
         val semesters: Array<Semester?>
-        var n: Int = Window.Companion.getInstance().getLeckekonyv().getSize()
+        var n: Int = Window.leckekonyv.size
         if (recentOnly.isSelected) {
             n = recentN.text.toInt()
         }
-        semesters = Window.Companion.getInstance().getLeckekonyv().findMostRecent(n)
-        val sumCreditGrade: Double = Leckekonyv.Companion.sumCreditGrade(semesters, mintaOnly.isSelected, acquiredOnly.isSelected)
-        val credits: Double
-        credits = if (customDiv.isSelected) {
+        semesters = Window.leckekonyv.findMostRecent(n)
+        val sumCreditGrade: Double = Leckekonyv.sumCreditGrade(semesters, mintaOnly.isSelected, acquiredOnly.isSelected)
+        val credits: Double = if (customDiv.isSelected) {
             div.text.toDouble()
         } else {
-            Leckekonyv.Companion.sumCredit(semesters, mintaOnly.isSelected, acquiredOnly.isSelected)
+            Leckekonyv.sumCredit(semesters, mintaOnly.isSelected, acquiredOnly.isSelected)
         }
         average.text = (sumCreditGrade / credits).toString()
         creditsCounted.text = credits.toString()

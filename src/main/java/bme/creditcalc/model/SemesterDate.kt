@@ -55,20 +55,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import java.util.*
 
-class SemesterDate(private val year: Int, private val semester: Int) {
+data class SemesterDate(val year: Int, val semester: Int) {
     override fun toString(): String {
         return year.toString() + "/" + (year + 1) + "/" + semester
-    }
-
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val that = o as SemesterDate
-        return year == that.year && semester == that.semester
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(year, semester)
     }
 
     companion object {
