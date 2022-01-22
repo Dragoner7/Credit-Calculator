@@ -1,7 +1,7 @@
 package bme.creditcalc.model
 
-import javax.swing.table.AbstractTableModel
 import java.util.*
+import javax.swing.table.AbstractTableModel
 
 data class Semester(val year: Int, val semester: Int) {
     private var subjectsBacking = mutableListOf<Subject>()

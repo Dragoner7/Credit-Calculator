@@ -1,35 +1,19 @@
 package bme.creditcalc.ui
 
-import javax.swing.JFrame
-import javax.swing.JPanel
 import bme.creditcalc.model.Leckekonyv
-import javax.swing.JTable
-import javax.swing.JLabel
-import java.awt.BorderLayout
+import bme.creditcalc.model.Semester
+import bme.creditcalc.model.Subject
+import bme.creditcalc.neptunreader.NeptunReader
+import bme.creditcalc.neptunreader.XLSXFileFilter
 import com.github.weisj.darklaf.LafManager
 import com.github.weisj.darklaf.theme.DarculaTheme
-import javax.swing.event.ListDataListener
-import javax.swing.event.ListDataEvent
-import javax.swing.JScrollPane
-import javax.swing.JPopupMenu
-import javax.swing.JMenuItem
-import java.awt.event.ActionEvent
-import javax.swing.JComboBox
-import bme.creditcalc.model.Semester
-import javax.swing.JButton
-import javax.swing.JMenuBar
-import javax.swing.JMenu
-import javax.swing.JOptionPane
-import javax.swing.table.DefaultTableModel
-import java.time.LocalDate
-import java.lang.NullPointerException
-import javax.swing.JFileChooser
-import bme.creditcalc.neptunreader.XLSXFileFilter
-import bme.creditcalc.neptunreader.NeptunReader
-import java.lang.Exception
-import bme.creditcalc.model.Subject
+import java.awt.BorderLayout
 import java.awt.Color
-import java.util.ArrayList
+import java.awt.event.ActionEvent
+import java.time.LocalDate
+import javax.swing.*
+import javax.swing.event.ListDataEvent
+import javax.swing.event.ListDataListener
 
 object Window : JFrame("Credit Calculator") {
     val DONE_COLOR = Color(0x368058)
