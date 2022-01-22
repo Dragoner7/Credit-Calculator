@@ -1,80 +1,100 @@
-package bme.creditcalc.model;
+package bme.creditcalc.model
 
-import java.util.Objects;
+import javax.swing.JFrame
+import javax.swing.JPanel
+import bme.creditcalc.model.Leckekonyv
+import javax.swing.JTable
+import javax.swing.JLabel
+import java.awt.BorderLayout
+import com.github.weisj.darklaf.LafManager
+import com.github.weisj.darklaf.theme.DarculaTheme
+import javax.swing.event.ListDataListener
+import javax.swing.event.ListDataEvent
+import bme.creditcalc.ui.SemesterTableCellRenderer
+import javax.swing.JScrollPane
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeEvent
+import javax.swing.JPopupMenu
+import javax.swing.JMenuItem
+import bme.creditcalc.ui.PopupListener
+import java.awt.event.ActionListener
+import java.awt.event.ActionEvent
+import javax.swing.JComboBox
+import bme.creditcalc.model.Semester
+import java.awt.Dimension
+import javax.swing.JButton
+import javax.swing.JMenuBar
+import javax.swing.JMenu
+import javax.swing.JOptionPane
+import bme.creditcalc.ui.AdvancedCalculator
+import javax.swing.table.DefaultTableModel
+import java.time.LocalDate
+import java.lang.NullPointerException
+import bme.creditcalc.ui.SemesterTable
+import javax.swing.JFileChooser
+import bme.creditcalc.neptunreader.XLSXFileFilter
+import bme.creditcalc.neptunreader.NeptunReader
+import java.lang.Exception
+import java.awt.event.MouseAdapter
+import javax.swing.table.AbstractTableModel
+import javax.swing.JDialog
+import javax.swing.JCheckBox
+import javax.swing.JRadioButton
+import javax.swing.JTextField
+import javax.swing.BoxLayout
+import javax.swing.table.TableCellRenderer
+import bme.creditcalc.model.SemesterDate
+import javax.swing.MutableComboBoxModel
+import java.util.function.Consumer
+import kotlin.jvm.JvmStatic
+import javax.swing.SwingWorker
+import kotlin.Throws
+import java.io.IOException
+import java.io.FileInputStream
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import java.util.*
 
-public class Subject {
-    private String name;
-    private double credit;
-    private int grade;
-    private boolean minta;
+class Subject(var name: String, var credit: Double) {
+    private var grade = 0
+    var minta = true
 
-    public Subject(String name, double credit){
-        this.name = name;
-        this.credit = credit;
-        this.grade = 0;
-        this.minta = true;
+    constructor(name: String, credit: Double, grade: Int) : this(name, credit) {
+        this.grade = grade
     }
-    public Subject(String name, double credit, int grade){
-        this(name, credit);
-        this.grade = grade;
-    }
-    public Subject(String name, double credit, int grade, boolean minta){
-        this(name, credit, grade);
-        this.minta = minta;
 
-    }
-    public double getCredit() {
-        return credit;
+    constructor(name: String, credit: Double, grade: Int, minta: Boolean) : this(name, credit, grade) {
+        this.minta = minta
     }
 
-    public String getName() {
-        return name;
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val subject = o as Subject
+        return java.lang.Double.compare(subject.credit, credit) == 0 && grade == subject.grade && name == subject.name
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Subject subject = (Subject) o;
-        return Double.compare(subject.credit, credit) == 0 && grade == subject.grade && name.equals(subject.name);
+    override fun hashCode(): Int {
+        return Objects.hash(name, credit, grade)
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, credit, grade);
-    }
-
-    public void setGrade(int grade) {
+    fun setGrade(grade: Int) {
         //if(!finalized){
-            if(grade > 5){
-                grade = 5;
-            } else if(grade < 0){
-                grade = 0;
-            }
-            this.grade = grade;
-            //this.finalized = true;
+        var grade = grade
+        if (grade > 5) {
+            grade = 5
+        } else if (grade < 0) {
+            grade = 0
+        }
+        this.grade = grade
+        //this.finalized = true;
         //}
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    val isFinalized: Boolean
+        get() = grade > 1
 
-    public void setCredit(double credit) {
-        this.credit = credit;
-    }
-
-    public void setMinta(boolean minta){this.minta = minta;}
-
-    public boolean isFinalized(){
-        return grade > 1;
-    }
-
-    public int getGrade() {
-        return grade;
-    }
-
-    public boolean getMinta(){
-        return minta;
+    fun getGrade(): Int {
+        return grade
     }
 }

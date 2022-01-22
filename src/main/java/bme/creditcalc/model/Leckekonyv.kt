@@ -1,141 +1,180 @@
-package bme.creditcalc.model;
+package bme.creditcalc.model
 
-import javax.swing.*;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+import javax.swing.JFrame
+import javax.swing.JPanel
+import bme.creditcalc.model.Leckekonyv
+import javax.swing.JTable
+import javax.swing.JLabel
+import java.awt.BorderLayout
+import com.github.weisj.darklaf.LafManager
+import com.github.weisj.darklaf.theme.DarculaTheme
+import javax.swing.event.ListDataListener
+import javax.swing.event.ListDataEvent
+import bme.creditcalc.ui.SemesterTableCellRenderer
+import javax.swing.JScrollPane
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeEvent
+import javax.swing.JPopupMenu
+import javax.swing.JMenuItem
+import bme.creditcalc.ui.PopupListener
+import java.awt.event.ActionListener
+import java.awt.event.ActionEvent
+import javax.swing.JComboBox
+import bme.creditcalc.model.Semester
+import java.awt.Dimension
+import javax.swing.JButton
+import javax.swing.JMenuBar
+import javax.swing.JMenu
+import javax.swing.JOptionPane
+import bme.creditcalc.ui.AdvancedCalculator
+import javax.swing.table.DefaultTableModel
+import java.time.LocalDate
+import java.lang.NullPointerException
+import bme.creditcalc.ui.SemesterTable
+import javax.swing.JFileChooser
+import bme.creditcalc.neptunreader.XLSXFileFilter
+import bme.creditcalc.neptunreader.NeptunReader
+import java.lang.Exception
+import java.awt.event.MouseAdapter
+import javax.swing.table.AbstractTableModel
+import javax.swing.JDialog
+import javax.swing.JCheckBox
+import javax.swing.JRadioButton
+import javax.swing.JTextField
+import javax.swing.BoxLayout
+import javax.swing.table.TableCellRenderer
+import bme.creditcalc.model.SemesterDate
+import javax.swing.MutableComboBoxModel
+import java.util.function.Consumer
+import kotlin.jvm.JvmStatic
+import javax.swing.SwingWorker
+import kotlin.Throws
+import java.io.IOException
+import java.io.FileInputStream
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import java.util.ArrayList
 
-public class Leckekonyv implements MutableComboBoxModel<Semester> {
-    ArrayList<Semester> semesters;
-    ArrayList<ListDataListener> listeners;
-    ArrayList<ActionListener> selectedChangeListeners;
-    Semester selected;
+class Leckekonyv : MutableComboBoxModel<Semester> {
+    var semesters: ArrayList<Semester?>
+    var listeners: ArrayList<ListDataListener>
+    var selectedChangeListeners: ArrayList<ActionListener>
+    var selected: Semester? = null
 
-    public Leckekonyv() {
-        this.semesters = new ArrayList<>();
-        this.listeners = new ArrayList<>();
-        this.selectedChangeListeners = new ArrayList<>();
+    init {
+        semesters = ArrayList()
+        listeners = ArrayList()
+        selectedChangeListeners = ArrayList()
     }
 
-    @Override
-    public void setSelectedItem(Object anItem) {
-        if(anItem instanceof Semester && semesters.contains(anItem)){
-            selected = (Semester) anItem;
+    override fun setSelectedItem(anItem: Any) {
+        if (anItem is Semester && semesters.contains(anItem)) {
+            selected = anItem
         }
-        notifySelectedChangeListeners();
+        notifySelectedChangeListeners()
     }
 
-    @Override
-    public Object getSelectedItem() {
-        return selected;
+    override fun getSelectedItem(): Any {
+        return selected!!
     }
 
-    @Override
-    public int getSize() {
-        return semesters.size();
+    override fun getSize(): Int {
+        return semesters.size
     }
 
-    @Override
-    public Semester getElementAt(int index) {
-        return semesters.get(index);
+    override fun getElementAt(index: Int): Semester? {
+        return semesters[index]
     }
 
-    @Override
-    public void addListDataListener(ListDataListener l) {
-        listeners.add(l);
+    override fun addListDataListener(l: ListDataListener) {
+        listeners.add(l)
     }
 
-    @Override
-    public void removeListDataListener(ListDataListener l) {
-        listeners.remove(l);
+    override fun removeListDataListener(l: ListDataListener) {
+        listeners.remove(l)
     }
 
-    public void addSelectedChangedListener(ActionListener l) {
-        selectedChangeListeners.add(l);
+    fun addSelectedChangedListener(l: ActionListener) {
+        selectedChangeListeners.add(l)
     }
 
-    public void removeSelectedChangedListener(ActionListener l) {
-        selectedChangeListeners.remove(l);
+    fun removeSelectedChangedListener(l: ActionListener) {
+        selectedChangeListeners.remove(l)
     }
 
-    private void notifySelectedChangeListeners(){
-        selectedChangeListeners.forEach(e->e.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "selectedChange")));
+    private fun notifySelectedChangeListeners() {
+        selectedChangeListeners.forEach(Consumer { e: ActionListener -> e.actionPerformed(ActionEvent(this, ActionEvent.ACTION_PERFORMED, "selectedChange")) })
     }
 
-    @Override
-    public void addElement(Semester item) {
-        semesters.add(item);
-        if(semesters.contains(item)){
-            setSelectedItem(item);
-            listeners.forEach(e-> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, semesters.indexOf(item), semesters.indexOf(item))));
+    override fun addElement(item: Semester) {
+        semesters.add(item)
+        if (semesters.contains(item)) {
+            selectedItem = item
+            listeners.forEach(Consumer { e: ListDataListener -> e.intervalAdded(ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, semesters.indexOf(item), semesters.indexOf(item))) })
         }
     }
 
-    @Override
-    public void removeElement(Object obj) {
-        if(obj instanceof Semester){
-            int indx = semesters.indexOf(obj);
-            semesters.remove(obj);
-            listeners.forEach(e-> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, indx, indx)));
+    override fun removeElement(obj: Any) {
+        if (obj is Semester) {
+            val indx = semesters.indexOf(obj)
+            semesters.remove(obj)
+            listeners.forEach(Consumer { e: ListDataListener -> e.intervalAdded(ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, indx, indx)) })
         }
-        if(!semesters.contains(selected)){
-            selected = null;
-            notifySelectedChangeListeners();
-        }
-    }
-
-    @Override
-    public void insertElementAt(Semester item, int index) {
-        semesters.add(index, item);
-        if(semesters.contains(item)) {
-            listeners.forEach(e -> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, index, index)));
-            selected = item;
-            notifySelectedChangeListeners();
+        if (!semesters.contains(selected)) {
+            selected = null
+            notifySelectedChangeListeners()
         }
     }
 
-    @Override
-    public void removeElementAt(int index) {
-        semesters.remove(index);
-        listeners.forEach(e-> e.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, index, index)));
-        if(!semesters.contains(selected)){
-            selected = null;
-            notifySelectedChangeListeners();
+    override fun insertElementAt(item: Semester, index: Int) {
+        semesters.add(index, item)
+        if (semesters.contains(item)) {
+            listeners.forEach(Consumer { e: ListDataListener -> e.intervalAdded(ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, index, index)) })
+            selected = item
+            notifySelectedChangeListeners()
         }
     }
-    public Semester[] toArray(){
-        return semesters.toArray(new Semester[0]);
-    }
 
-    public Semester[] findMostRecent(int n){
-        List<Semester> sorted = (List<Semester>) semesters.subList(0, semesters.size());
-        sorted.sort((e1, e2)-> SemesterDate.compare(e2.getDate(), e1.getDate()));
-        List<Semester> cropped = (List<Semester>) sorted.subList(0, n);
-        return (Semester[]) cropped.toArray(new Semester[cropped.size()]);
-    }
-
-    public double collagePoints(double tk, double plusPoints){
-        Semester[] recent2 = findMostRecent(2);
-        double a = Semester.creditIndexAverages(recent2);
-        return (a - 2.0)/ ( (tk - 2.0) / 100 ) + plusPoints;
-    }
-
-    public static double sumCreditGrade(Semester[] semesters, boolean mintaOnly, boolean finalizedOnly){
-        double sumCreditGrade = 0;
-        for(Semester s : semesters){
-            sumCreditGrade += s.sumGradeCredit(mintaOnly, finalizedOnly);
+    override fun removeElementAt(index: Int) {
+        semesters.removeAt(index)
+        listeners.forEach(Consumer { e: ListDataListener -> e.intervalAdded(ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, index, index)) })
+        if (!semesters.contains(selected)) {
+            selected = null
+            notifySelectedChangeListeners()
         }
-        return sumCreditGrade;
     }
 
-    public static double sumCredit(Semester[] semesters, boolean mintaOnly, boolean finalizedOnly){
-        double sumCredit = 0;
-        for(Semester s : semesters){
-            sumCredit += s.sumCredit(mintaOnly, finalizedOnly);
+    fun toArray(): Array<Semester?> {
+        return semesters.toTypedArray()
+    }
+
+    fun findMostRecent(n: Int): Array<Semester?> {
+        val sorted = semesters.subList(0, semesters.size) as List<Semester?>
+        sorted.sort(java.util.Comparator { e1: Semester, e2: Semester -> SemesterDate.Companion.compare(e2.getDate(), e1.getDate()) })
+        return sorted.subList(0, n).toTypedArray()
+    }
+
+    fun collagePoints(tk: Double, plusPoints: Double): Double {
+        val recent2 = findMostRecent(2)
+        val a: Double = Semester.Companion.creditIndexAverages(recent2)
+        return (a - 2.0) / ((tk - 2.0) / 100) + plusPoints
+    }
+
+    companion object {
+        fun sumCreditGrade(semesters: Array<Semester?>, mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+            var sumCreditGrade = 0.0
+            for (s in semesters) {
+                sumCreditGrade += s!!.sumGradeCredit(mintaOnly, finalizedOnly)
+            }
+            return sumCreditGrade
         }
-        return sumCredit;
+
+        fun sumCredit(semesters: Array<Semester?>, mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+            var sumCredit = 0.0
+            for (s in semesters) {
+                sumCredit += s!!.sumCredit(mintaOnly, finalizedOnly)
+            }
+            return sumCredit
+        }
     }
 }

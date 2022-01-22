@@ -1,207 +1,231 @@
-package bme.creditcalc.ui;
+package bme.creditcalc.ui
 
-import bme.creditcalc.model.Semester;
-import bme.creditcalc.model.Subject;
-import bme.creditcalc.neptunreader.NeptunReader;
-import bme.creditcalc.model.Leckekonyv;
-import bme.creditcalc.neptunreader.XLSXFileFilter;
-import com.github.weisj.darklaf.LafManager;
-import com.github.weisj.darklaf.theme.DarculaTheme;
+import javax.swing.JFrame
+import javax.swing.JPanel
+import bme.creditcalc.model.Leckekonyv
+import javax.swing.JTable
+import javax.swing.JLabel
+import java.awt.BorderLayout
+import com.github.weisj.darklaf.LafManager
+import com.github.weisj.darklaf.theme.DarculaTheme
+import javax.swing.event.ListDataListener
+import javax.swing.event.ListDataEvent
+import bme.creditcalc.ui.SemesterTableCellRenderer
+import javax.swing.JScrollPane
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeEvent
+import javax.swing.JPopupMenu
+import javax.swing.JMenuItem
+import bme.creditcalc.ui.PopupListener
+import java.awt.event.ActionListener
+import java.awt.event.ActionEvent
+import javax.swing.JComboBox
+import bme.creditcalc.model.Semester
+import java.awt.Dimension
+import javax.swing.JButton
+import javax.swing.JMenuBar
+import javax.swing.JMenu
+import javax.swing.JOptionPane
+import bme.creditcalc.ui.AdvancedCalculator
+import javax.swing.table.DefaultTableModel
+import java.time.LocalDate
+import java.lang.NullPointerException
+import bme.creditcalc.ui.SemesterTable
+import javax.swing.JFileChooser
+import bme.creditcalc.neptunreader.XLSXFileFilter
+import bme.creditcalc.neptunreader.NeptunReader
+import java.lang.Exception
+import java.awt.event.MouseAdapter
+import javax.swing.table.AbstractTableModel
+import javax.swing.JDialog
+import javax.swing.JCheckBox
+import javax.swing.JRadioButton
+import javax.swing.JTextField
+import javax.swing.BoxLayout
+import javax.swing.table.TableCellRenderer
+import bme.creditcalc.model.SemesterDate
+import bme.creditcalc.model.Subject
+import javax.swing.MutableComboBoxModel
+import java.util.function.Consumer
+import kotlin.jvm.JvmStatic
+import javax.swing.SwingWorker
+import kotlin.Throws
+import java.io.IOException
+import java.io.FileInputStream
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import java.awt.Color
+import java.util.ArrayList
 
-import javax.swing.*;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.io.File;
-import java.time.LocalDate;
-import java.util.ArrayList;
+class Window protected constructor() : JFrame("Credit Calculator") {
+    private val mainPanel: JPanel
+    val leckekonyv = Leckekonyv()
+    private var table: JTable? = null
+    private var creditLabel: JLabel? = null
+    private var averageLabel: JLabel? = null
+    private var creditIndexLabel: JLabel? = null
 
-public class Window extends JFrame{
-    public static final Color DONE_COLOR = new Color(0x368058);
-
-    private static Window instance = new Window();
-    public static Window getInstance(){
-        return instance;
+    init {
+        mainPanel = JPanel(BorderLayout())
+        defaultCloseOperation = EXIT_ON_CLOSE
+        contentPane.add(mainPanel, BorderLayout.CENTER)
+        initializeWindow()
+        isResizable = false
+        pack()
+        LafManager.install(DarculaTheme())
     }
 
-    private final JPanel mainPanel;
-    private Leckekonyv leckekonyv = new Leckekonyv();
-    private JTable table;
-    private JLabel creditLabel;
-    private JLabel averageLabel;
-    private JLabel creditIndexLabel;
-
-    protected Window(){
-        super("Credit Calculator");
-        mainPanel = new JPanel(new BorderLayout());
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getContentPane().add(mainPanel, BorderLayout.CENTER);
-        initializeWindow();
-        setResizable(false);
-        pack();
-        LafManager.install(new DarculaTheme());
-    }
-    private void initializeWindow(){
-        JPanel infoPanel = new JPanel();
-        averageLabel = new JLabel();
-        creditIndexLabel = new JLabel();
-        creditLabel = new JLabel();
-        infoPanel.add(creditLabel);
-        infoPanel.add(averageLabel);
-        infoPanel.add(creditIndexLabel);
-        mainPanel.add(infoPanel, BorderLayout.SOUTH);
-
-        leckekonyv.addListDataListener(new ListDataListener() {
-            @Override
-            public void intervalAdded(ListDataEvent e) {
-                update();
+    private fun initializeWindow() {
+        val infoPanel = JPanel()
+        averageLabel = JLabel()
+        creditIndexLabel = JLabel()
+        creditLabel = JLabel()
+        infoPanel.add(creditLabel)
+        infoPanel.add(averageLabel)
+        infoPanel.add(creditIndexLabel)
+        mainPanel.add(infoPanel, BorderLayout.SOUTH)
+        leckekonyv.addListDataListener(object : ListDataListener {
+            override fun intervalAdded(e: ListDataEvent) {
+                update()
             }
 
-            @Override
-            public void intervalRemoved(ListDataEvent e) {
-                update();
+            override fun intervalRemoved(e: ListDataEvent) {
+                update()
             }
 
-            @Override
-            public void contentsChanged(ListDataEvent e) {
-                update();
+            override fun contentsChanged(e: ListDataEvent) {
+                update()
             }
-            public void update(){
-                updateTableModel();
-                updateAverages();
+
+            fun update() {
+                updateTableModel()
+                updateAverages()
             }
-        });
-
-        initializeMenu();
-        initializeTable();
-        initializeTableMenu();
-        initializeComboBox();
+        })
+        initializeMenu()
+        initializeTable()
+        initializeTableMenu()
+        initializeComboBox()
     }
-    private void initializeTable(){
-        table = new JTable(null);
-        table.setDefaultRenderer(String.class, new SemesterTableCellRenderer(table.getDefaultRenderer(String.class)));
-        table.setDefaultRenderer(Integer.class, new SemesterTableCellRenderer(table.getDefaultRenderer(Integer.class)));
-        table.setDefaultRenderer(Boolean.class, new SemesterTableCellRenderer(table.getDefaultRenderer(Boolean.class)));
-        table.setDefaultRenderer(Double.class, new SemesterTableCellRenderer(table.getDefaultRenderer(Double.class)));
-        JScrollPane scrollPane = new JScrollPane(table);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        table.addPropertyChangeListener(e -> updateAverages());
+    private fun initializeTable() {
+        table = JTable(null)
+        table!!.setDefaultRenderer(String::class.java, SemesterTableCellRenderer(table!!.getDefaultRenderer(String::class.java)))
+        table!!.setDefaultRenderer(Int::class.java, SemesterTableCellRenderer(table!!.getDefaultRenderer(Int::class.java)))
+        table!!.setDefaultRenderer(Boolean::class.java, SemesterTableCellRenderer(table!!.getDefaultRenderer(Boolean::class.java)))
+        table!!.setDefaultRenderer(Double::class.java, SemesterTableCellRenderer(table!!.getDefaultRenderer(Double::class.java)))
+        val scrollPane = JScrollPane(table)
+        mainPanel.add(scrollPane, BorderLayout.CENTER)
+        table!!.addPropertyChangeListener { e: PropertyChangeEvent? -> updateAverages() }
     }
-    private void initializeTableMenu(){
-        JPopupMenu tableMenu = new JPopupMenu();
-        JMenuItem addMenuItem = new JMenuItem("Add Subject");
-        JMenuItem deleteMenuItem = new JMenuItem("Delete Subject");
-        tableMenu.add(addMenuItem);
-        tableMenu.add(deleteMenuItem);
-        PopupListener popupListener = new PopupListener(tableMenu);
-        table.addMouseListener(popupListener);
 
-        addMenuItem.addActionListener(e->addSubject(table.rowAtPoint(popupListener.getLastPopupLocation())));
-        deleteMenuItem.addActionListener(e->deleteSubject(table.rowAtPoint(popupListener.getLastPopupLocation())));
+    private fun initializeTableMenu() {
+        val tableMenu = JPopupMenu()
+        val addMenuItem = JMenuItem("Add Subject")
+        val deleteMenuItem = JMenuItem("Delete Subject")
+        tableMenu.add(addMenuItem)
+        tableMenu.add(deleteMenuItem)
+        val popupListener = PopupListener(tableMenu)
+        table!!.addMouseListener(popupListener)
+        addMenuItem.addActionListener { e: ActionEvent? -> addSubject(table!!.rowAtPoint(popupListener.lastPopupLocation)) }
+        deleteMenuItem.addActionListener { e: ActionEvent? -> deleteSubject(table!!.rowAtPoint(popupListener.lastPopupLocation)) }
     }
-    private void initializeComboBox(){
-        JPanel topPanel = new JPanel();
-        JComboBox<Semester> comboBox = new JComboBox<>(leckekonyv);
-        Dimension dim = comboBox.getPreferredSize();
-        dim.width = 400;
-        comboBox.setPreferredSize(dim);
-        topPanel.add(comboBox);
 
-        leckekonyv.addSelectedChangedListener(e -> updateTableModel());
+    private fun initializeComboBox() {
+        val topPanel = JPanel()
+        val comboBox = JComboBox(leckekonyv)
+        val dim = comboBox.preferredSize
+        dim.width = 400
+        comboBox.preferredSize = dim
+        topPanel.add(comboBox)
+        leckekonyv.addSelectedChangedListener { e: ActionEvent? -> updateTableModel() }
         //leckekonyv.addSelectedChangedListener(e->comboBox.invalidate());
-
-        JButton newButton = new JButton("New");
-        topPanel.add(newButton);
-        newButton.addActionListener(e->addSemesterDialog());
-        JButton deleteButton = new JButton("Delete");
-        topPanel.add(deleteButton);
-        deleteButton.addActionListener(e->deleteLastSemester());
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-    }
-    private void initializeMenu(){
-        JMenuBar menuBar = new JMenuBar();
-        setJMenuBar(menuBar);
-
-        JMenu subjectsMenu = new JMenu("Subjects");
-        menuBar.add(subjectsMenu);
-        JMenuItem addSubjectMenuItem = new JMenuItem("Add");
-        subjectsMenu.add(addSubjectMenuItem);
-        JMenuItem removeSubjectMenuItem = new JMenuItem("Remove");
-        subjectsMenu.add(removeSubjectMenuItem);
-
-        addSubjectMenuItem.addActionListener(e-> addNewSubject());
-        removeSubjectMenuItem.addActionListener(e-> deleteSubject(Integer.parseInt((String) JOptionPane.showInputDialog(
-                this,
-                "Which subject to delete (row number):",
-                "Which subject to delete",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                0
-        ))));
-
-        JMenu calculateMenu = new JMenu("Calculate");
-        menuBar.add(calculateMenu);
-        JMenuItem calculateCollagePointsMenuItem = new JMenuItem("Collage points");
-        calculateMenu.add(calculateCollagePointsMenuItem);
-
-        calculateCollagePointsMenuItem.addActionListener(e -> calculateCollageDialog());
-
-        JMenuItem AdvancedCalculatorMenuItem = new JMenuItem("Advanced");
-        calculateMenu.add(AdvancedCalculatorMenuItem);
-
-        AdvancedCalculatorMenuItem.addActionListener(e -> {
-            AdvancedCalculator dialog = new AdvancedCalculator(this);
-            dialog.setVisible(true);
-            dialog.setLocationRelativeTo(this);
-        });
+        val newButton = JButton("New")
+        topPanel.add(newButton)
+        newButton.addActionListener { e: ActionEvent? -> addSemesterDialog() }
+        val deleteButton = JButton("Delete")
+        topPanel.add(deleteButton)
+        deleteButton.addActionListener { e: ActionEvent? -> deleteLastSemester() }
+        mainPanel.add(topPanel, BorderLayout.NORTH)
     }
 
-    private void updateTableModel(){
-        Semester selected = (Semester) leckekonyv.getSelectedItem();
-        if(selected != null){
-            table.setModel(selected.getView());
+    private fun initializeMenu() {
+        val menuBar = JMenuBar()
+        jMenuBar = menuBar
+        val subjectsMenu = JMenu("Subjects")
+        menuBar.add(subjectsMenu)
+        val addSubjectMenuItem = JMenuItem("Add")
+        subjectsMenu.add(addSubjectMenuItem)
+        val removeSubjectMenuItem = JMenuItem("Remove")
+        subjectsMenu.add(removeSubjectMenuItem)
+        addSubjectMenuItem.addActionListener { e: ActionEvent? -> addNewSubject() }
+        removeSubjectMenuItem.addActionListener { e: ActionEvent? ->
+            deleteSubject(JOptionPane.showInputDialog(
+                    this,
+                    "Which subject to delete (row number):",
+                    "Which subject to delete",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    null,
+                    0
+            ) as String?. toInt ())
+        }
+        val calculateMenu = JMenu("Calculate")
+        menuBar.add(calculateMenu)
+        val calculateCollagePointsMenuItem = JMenuItem("Collage points")
+        calculateMenu.add(calculateCollagePointsMenuItem)
+        calculateCollagePointsMenuItem.addActionListener { e: ActionEvent? -> calculateCollageDialog() }
+        val AdvancedCalculatorMenuItem = JMenuItem("Advanced")
+        calculateMenu.add(AdvancedCalculatorMenuItem)
+        AdvancedCalculatorMenuItem.addActionListener { e: ActionEvent? ->
+            val dialog = AdvancedCalculator(this)
+            dialog.isVisible = true
+            dialog.setLocationRelativeTo(this)
+        }
+    }
+
+    private fun updateTableModel() {
+        val selected = leckekonyv.selectedItem as Semester
+        if (selected != null) {
+            table!!.model = selected.view
         } else {
-            table.setModel(new DefaultTableModel());
+            table!!.model = DefaultTableModel()
         }
-        updateAverages();
-
+        updateAverages()
     }
-    private void updateAverages(){
-        Semester selected = (Semester) leckekonyv.getSelectedItem();
-        if(selected != null) {
-            creditLabel.setText("Credits: " + selected.sumCredit(false, false));
-            averageLabel.setText("Average: " + selected.calculateAverage(false, false));
-            creditIndexLabel.setText("CreditIndex: " + selected.calculateCreditIndex());
+
+    private fun updateAverages() {
+        val selected = leckekonyv.selectedItem as Semester
+        if (selected != null) {
+            creditLabel!!.text = "Credits: " + selected.sumCredit(false, false)
+            averageLabel!!.text = "Average: " + selected.calculateAverage(false, false)
+            creditIndexLabel!!.text = "CreditIndex: " + selected.calculateCreditIndex()
         } else {
-            creditLabel.setText("Credits:");
-            averageLabel.setText("Average:");
-            creditIndexLabel.setText("CreditIndex:");
+            creditLabel!!.text = "Credits:"
+            averageLabel!!.text = "Average:"
+            creditIndexLabel!!.text = "CreditIndex:"
         }
     }
 
-    private void newEmptySemester(){
-        ArrayList<Integer> years = new ArrayList<>();
-        LocalDate now = LocalDate.now();
-        for(int i = now.getYear() - 10; i < now.getYear() + 10;++i){
-            years.add(i);
+    private fun newEmptySemester() {
+        val years = ArrayList<Int>()
+        val now = LocalDate.now()
+        for (i in now.year - 10 until now.year + 10) {
+            years.add(i)
         }
-        try{
-            int selectedYear = (Integer) JOptionPane.showInputDialog(
+        try {
+            val selectedYear = JOptionPane.showInputDialog(
                     this,
                     "Choose year",
                     "Choose year",
                     JOptionPane.PLAIN_MESSAGE,
                     null,
-                    years.toArray(),
-                    now.getYear()
-            );
-            String[] options = {"Winter",
-                    "Spring"};
-            int selectedSemester = JOptionPane.showOptionDialog(
+                    years.toTypedArray(),
+                    now.year
+            ) as Int
+            val options = arrayOf("Winter",
+                    "Spring")
+            val selectedSemester = JOptionPane.showOptionDialog(
                     this,
                     "Select season",
                     "Select season",
@@ -210,64 +234,58 @@ public class Window extends JFrame{
                     null,
                     options,
                     options[0]
-            ) + 1;
-            if(selectedSemester < 1 || selectedSemester > 2){
-                throw new NullPointerException();
+            ) + 1
+            if (selectedSemester < 1 || selectedSemester > 2) {
+                throw NullPointerException()
             }
-            addSemester(new Semester(selectedYear, selectedSemester));
-        } catch (NullPointerException ignored){}
-
+            addSemester(Semester(selectedYear, selectedSemester))
+        } catch (ignored: NullPointerException) {
+        }
     }
 
-    public void deleteLastSemester(){
-        leckekonyv.removeElement(leckekonyv.getSelectedItem());
+    fun deleteLastSemester() {
+        leckekonyv.removeElement(leckekonyv.selectedItem)
     }
 
-    public void addSemester(Semester semester){
-        SemesterTable semesterTable = new SemesterTable();
-        semester.attachView(semesterTable);
-        semesterTable.setModel(semester);
-        leckekonyv.addElement(semester);
+    fun addSemester(semester: Semester?) {
+        val semesterTable = SemesterTable()
+        semester!!.attachView(semesterTable)
+        semesterTable.setModel(semester)
+        leckekonyv.addElement(semester)
     }
 
-    private void loadSemester() {
-        JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-        fc.setFileFilter(new XLSXFileFilter());
+    private fun loadSemester() {
+        val fc = JFileChooser(System.getProperty("user.dir"))
+        fc.fileFilter = XLSXFileFilter()
         //fc.changeToParentDirectory();
-        int returnVal = fc.showOpenDialog(this);
+        val returnVal = fc.showOpenDialog(this)
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            (new NeptunReader(file, leckekonyv)).execute();
+            val file = fc.selectedFile
+            NeptunReader(file, leckekonyv).execute()
         }
         //updateTableModel();
     }
 
-    public void addNewSubject(){
-        Semester currentSemester = (Semester) leckekonyv.getSelectedItem();
-        if(currentSemester != null){
-            currentSemester.addSubject(new Subject("New Subject", 0, 1));
-        }
+    fun addNewSubject() {
+        val currentSemester = leckekonyv.selectedItem as Semester
+        currentSemester?.addSubject(Subject("New Subject", 0, 1))
     }
 
-    private void addSubject(int row){
-        Semester currentSemester = (Semester) leckekonyv.getSelectedItem();
-        if(currentSemester != null){
-            currentSemester.addSubjectAt(row, new Subject("New Subject", 0, 1));
-        }
+    private fun addSubject(row: Int) {
+        val currentSemester = leckekonyv.selectedItem as Semester
+        currentSemester?.addSubjectAt(row, Subject("New Subject", 0, 1))
     }
 
-    public void deleteSubject(int row){
-        Semester currentSemester = (Semester) leckekonyv.getSelectedItem();
-        if(currentSemester != null){
-            currentSemester.removeSubjectAt(row);
-        }
+    fun deleteSubject(row: Int) {
+        val currentSemester = leckekonyv.selectedItem as Semester
+        currentSemester?.removeSubjectAt(row)
     }
 
-    private void calculateCollageDialog(){
-        double tk = 4;
-        double plusPoints = 0;
-        try{
-            tk = Double.parseDouble((String) JOptionPane.showInputDialog(
+    private fun calculateCollageDialog() {
+        var tk = 4.0
+        var plusPoints = 0.0
+        try {
+            tk = JOptionPane.showInputDialog(
                     this,
                     "Enter 'tanulmányilag kiemelt' value:",
                     "Enter 'tanulmányilag kiemelt' value:",
@@ -275,8 +293,8 @@ public class Window extends JFrame{
                     null,
                     null,
                     tk
-            ));
-            plusPoints = Double.parseDouble((String) JOptionPane.showInputDialog(
+            ) as String?. toDouble ()
+            plusPoints = JOptionPane.showInputDialog(
                     this,
                     "Enter plus points:",
                     "Enter plus points (if you have any):",
@@ -284,14 +302,16 @@ public class Window extends JFrame{
                     null,
                     null,
                     plusPoints
-            ));
-            double points = leckekonyv.collagePoints(tk, plusPoints);
-            JOptionPane.showMessageDialog(this, "Your collage points: " + points);
-        }catch (Exception ignored){ }
+            ) as String?. toDouble ()
+            val points = leckekonyv.collagePoints(tk, plusPoints)
+            JOptionPane.showMessageDialog(this, "Your collage points: $points")
+        } catch (ignored: Exception) {
+        }
     }
-    private void addSemesterDialog(){
-        String[] options = {"New", "Import Neptun XLSX", "Cancel"};
-        int result;
+
+    private fun addSemesterDialog() {
+        val options = arrayOf("New", "Import Neptun XLSX", "Cancel")
+        val result: Int
         result = JOptionPane.showOptionDialog(
                 this,
                 "Please select from the options below",
@@ -301,18 +321,15 @@ public class Window extends JFrame{
                 null,
                 options,
                 options[2]
-        );
-        switch (result){
-            case 0:
-                newEmptySemester();
-                break;
-            case 1:
-                loadSemester();
-                break;
+        )
+        when (result) {
+            0 -> newEmptySemester()
+            1 -> loadSemester()
         }
     }
 
-    public Leckekonyv getLeckekonyv() {
-        return leckekonyv;
+    companion object {
+        val DONE_COLOR = Color(0x368058)
+        val instance = Window()
     }
 }

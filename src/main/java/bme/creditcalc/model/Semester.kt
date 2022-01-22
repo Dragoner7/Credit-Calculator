@@ -1,133 +1,176 @@
-package bme.creditcalc.model;
+package bme.creditcalc.model
 
-import javax.swing.table.AbstractTableModel;
-import java.util.*;
+import javax.swing.JFrame
+import javax.swing.JPanel
+import bme.creditcalc.model.Leckekonyv
+import javax.swing.JTable
+import javax.swing.JLabel
+import java.awt.BorderLayout
+import com.github.weisj.darklaf.LafManager
+import com.github.weisj.darklaf.theme.DarculaTheme
+import javax.swing.event.ListDataListener
+import javax.swing.event.ListDataEvent
+import bme.creditcalc.ui.SemesterTableCellRenderer
+import javax.swing.JScrollPane
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeEvent
+import javax.swing.JPopupMenu
+import javax.swing.JMenuItem
+import bme.creditcalc.ui.PopupListener
+import java.awt.event.ActionListener
+import java.awt.event.ActionEvent
+import javax.swing.JComboBox
+import bme.creditcalc.model.Semester
+import java.awt.Dimension
+import javax.swing.JButton
+import javax.swing.JMenuBar
+import javax.swing.JMenu
+import javax.swing.JOptionPane
+import bme.creditcalc.ui.AdvancedCalculator
+import javax.swing.table.DefaultTableModel
+import java.time.LocalDate
+import java.lang.NullPointerException
+import bme.creditcalc.ui.SemesterTable
+import javax.swing.JFileChooser
+import bme.creditcalc.neptunreader.XLSXFileFilter
+import bme.creditcalc.neptunreader.NeptunReader
+import java.lang.Exception
+import java.awt.event.MouseAdapter
+import javax.swing.table.AbstractTableModel
+import javax.swing.JDialog
+import javax.swing.JCheckBox
+import javax.swing.JRadioButton
+import javax.swing.JTextField
+import javax.swing.BoxLayout
+import javax.swing.table.TableCellRenderer
+import bme.creditcalc.model.SemesterDate
+import javax.swing.MutableComboBoxModel
+import java.util.function.Consumer
+import kotlin.jvm.JvmStatic
+import javax.swing.SwingWorker
+import kotlin.Throws
+import java.io.IOException
+import java.io.FileInputStream
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import java.util.*
 
-public class Semester {
-    private ArrayList<Subject> subjects = new ArrayList<>();
-    private AbstractTableModel view;
-    SemesterDate date;
-    public Semester(int year, int semester){
-        date = new SemesterDate(year, semester);
+class Semester(year: Int, semester: Int) {
+    private val subjects = ArrayList<Subject>()
+    var view: AbstractTableModel? = null
+        private set
+    var date: SemesterDate
+
+    init {
+        date = SemesterDate(year, semester)
     }
-    public void addSubject(Subject s){
-        subjects.add(s);
-        if(view != null){
-            view.fireTableRowsInserted(subjects.indexOf(s), subjects.indexOf(s));
+
+    fun addSubject(s: Subject) {
+        subjects.add(s)
+        if (view != null) {
+            view!!.fireTableRowsInserted(subjects.indexOf(s), subjects.indexOf(s))
         }
     }
 
-    public void removeSubject(Subject s){
-        subjects.remove(s);
-        if(view != null){
-            view.fireTableRowsDeleted(subjects.indexOf(s), subjects.indexOf(s));
+    fun removeSubject(s: Subject) {
+        subjects.remove(s)
+        if (view != null) {
+            view!!.fireTableRowsDeleted(subjects.indexOf(s), subjects.indexOf(s))
         }
     }
 
-    public void removeSubjectAt(int row){
-        subjects.remove(row);
-        if(view != null) {
-            view.fireTableRowsDeleted(row, row);
+    fun removeSubjectAt(row: Int) {
+        subjects.removeAt(row)
+        if (view != null) {
+            view!!.fireTableRowsDeleted(row, row)
         }
     }
 
-    public void addSubjectAt(int row, Subject s){
-        if(row > subjects.size() || row < 0){
-            addSubject(s);
-            return;
+    fun addSubjectAt(row: Int, s: Subject) {
+        if (row > subjects.size || row < 0) {
+            addSubject(s)
+            return
         }
-        subjects.add(row, s);
-        if(view != null) {
-            view.fireTableRowsInserted(row, row);
+        subjects.add(row, s)
+        if (view != null) {
+            view!!.fireTableRowsInserted(row, row)
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Semester semester = (Semester) o;
-        return date.equals(semester.date);
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val semester = o as Semester
+        return date == semester.date
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(date);
+    override fun hashCode(): Int {
+        return Objects.hash(date)
     }
 
-    public SemesterDate getDate() {
-        return date;
+    fun getSubject(indx: Int): Subject {
+        return subjects[indx]
     }
 
-    public Subject getSubject(int indx){
-        return subjects.get(indx);
+    fun getSubjects(): List<Subject?> {
+        return subjects.clone() as List<Subject?>
     }
 
-    public List<Subject> getSubjects() {
-        return (List<Subject>) subjects.clone();
+    fun attachView(view: AbstractTableModel?) {
+        this.view = view
     }
 
-    public void attachView(AbstractTableModel view){
-        this.view = view;
+    fun detachView() {
+        view = null
     }
 
-    public void detachView(){
-        this.view = null;
+    fun calculateAverage(mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+        return sumGradeCredit(mintaOnly, finalizedOnly) / sumCredit(mintaOnly, finalizedOnly)
     }
 
-    public AbstractTableModel getView(){
-        return view;
-    }
-
-    public double calculateAverage(boolean mintaOnly, boolean finalizedOnly){
-        return sumGradeCredit(mintaOnly, finalizedOnly) / sumCredit(mintaOnly, finalizedOnly);
-    }
-
-    public double calculateCreditIndex(){
-        double sumGradeTimesCredit = 0;
-        for(Subject s : subjects){
-            sumGradeTimesCredit += s.getCredit() * s.getGrade();
+    fun calculateCreditIndex(): Double {
+        var sumGradeTimesCredit = 0.0
+        for (s in subjects) {
+            sumGradeTimesCredit += s.credit * s.grade
         }
-        return sumGradeTimesCredit / 30;
+        return sumGradeTimesCredit / 30
     }
 
-    public double sumGradeCredit(boolean mintaOnly, boolean finalizedOnly){
-        double sumGrade = 0;
-        for(Subject s : subjects){
-            if((!mintaOnly || s.getMinta()) && (!finalizedOnly || s.isFinalized())){
-                sumGrade += s.getGrade() * s.getCredit();
+    fun sumGradeCredit(mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+        var sumGrade = 0.0
+        for (s in subjects) {
+            if ((!mintaOnly || s.minta) && (!finalizedOnly || s.isFinalized)) {
+                sumGrade += s.grade * s.credit
             }
         }
-        return sumGrade;
+        return sumGrade
     }
 
-    public double sumCredit(boolean mintaOnly, boolean finalizedOnly){
-        double sumCredit = 0;
-        for(Subject s : subjects){
-            if((!mintaOnly || s.getMinta()) && (!finalizedOnly || s.isFinalized())) {
-                sumCredit += s.getCredit();
+    fun sumCredit(mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+        var sumCredit = 0.0
+        for (s in subjects) {
+            if ((!mintaOnly || s.minta) && (!finalizedOnly || s.isFinalized)) {
+                sumCredit += s.credit
             }
         }
-        return sumCredit;
+        return sumCredit
     }
 
-    @Override
-    public String toString() {
-        return date.toString();
+    override fun toString(): String {
+        return date.toString()
     }
 
-    public static double creditIndexAverages(Semester[] semesters){
-        double result = 0;
-        for(int i = 0; i < semesters.length; ++i){
-            if(semesters[i] == null){
-                return Double.NaN;
+    companion object {
+        fun creditIndexAverages(semesters: Array<Semester?>): Double {
+            var result = 0.0
+            for (i in semesters.indices) {
+                if (semesters[i] == null) {
+                    return Double.NaN
+                }
+                result += semesters[i]!!.calculateCreditIndex()
             }
-            result += semesters[i].calculateCreditIndex();
-        }
-        return result / semesters.length;
-    }
-
-    /*public static Semester[] find2MostRecentSemesters(Semester[] semesters) {
+            return result / semesters.size
+        } /*public static Semester[] find2MostRecentSemesters(Semester[] semesters) {
         Semester[] result = new Semester[2];
         for (int i = 0; i < semesters.length; ++i) {
             if (result[0] == null || SemesterDate.compare(semesters[i].getDate(), result[0].getDate()) > 0) {
@@ -139,4 +182,5 @@ public class Semester {
         }
         return result;
     }*/
+    }
 }
