@@ -8,7 +8,7 @@ import javax.swing.event.ListDataEvent
 import javax.swing.event.ListDataListener
 
 class Leckekonyv : MutableComboBoxModel<Semester> {
-    var semesters = mutableListOf<Semester>()
+    private var semesters = mutableListOf<Semester>()
     private var listeners = mutableListOf<ListDataListener>()
     private var selectedChangeListeners = mutableListOf<ActionListener>()
     private var selected: Semester? = null
@@ -28,7 +28,7 @@ class Leckekonyv : MutableComboBoxModel<Semester> {
         return semesters.size
     }
 
-    override fun getElementAt(index: Int): Semester? {
+    override fun getElementAt(index: Int): Semester {
         return semesters[index]
     }
 

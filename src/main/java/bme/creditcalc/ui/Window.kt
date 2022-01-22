@@ -216,17 +216,17 @@ object Window : JFrame("Credit Calculator") {
 
     private fun addNewSubject() {
         val currentSemester = leckekonyv.selectedItem as Semester
-        currentSemester?.addSubject(Subject("New Subject", 0.0, 1))
+        currentSemester.addSubject(Subject("New Subject", 0.0, 1))
     }
 
     private fun addSubject(row: Int) {
         val currentSemester = leckekonyv.selectedItem as Semester
-        currentSemester?.addSubjectAt(row, Subject("New Subject", 0.0, 1))
+        currentSemester.addSubjectAt(row, Subject("New Subject", 0.0, 1))
     }
 
     private fun deleteSubject(row: Int) {
         val currentSemester = leckekonyv.selectedItem as Semester
-        currentSemester?.removeSubjectAt(row)
+        currentSemester.removeSubjectAt(row)
     }
 
     private fun calculateCollageDialog() {
