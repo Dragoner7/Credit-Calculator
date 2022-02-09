@@ -73,7 +73,7 @@ data class Semester(val year: Int, val semester: Int) {
         return sumGradeTimesCredit / 30
     }
 
-    fun sumGradeCredit(mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+    fun sumGradeCredit(mintaOnly: Boolean = false, finalizedOnly: Boolean = false): Double {
         var sumGrade = 0.0
         for (s in subjects) {
             if ((!mintaOnly || s.minta) && (!finalizedOnly || s.isFinalized)) {
@@ -83,7 +83,7 @@ data class Semester(val year: Int, val semester: Int) {
         return sumGrade
     }
 
-    fun sumCredit(mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+    fun sumCredit(mintaOnly: Boolean = false, finalizedOnly: Boolean = false): Double {
         var sumCredit = 0.0
         for (s in subjects) {
             if ((!mintaOnly || s.minta) && (!finalizedOnly || s.isFinalized)) {
@@ -95,18 +95,5 @@ data class Semester(val year: Int, val semester: Int) {
 
     override fun toString(): String {
         return date.toString()
-    }
-
-    companion object {
-        fun creditIndexAverages(semesters: Array<Semester?>): Double {
-            var result = 0.0
-            for (i in semesters.indices) {
-                if (semesters[i] == null) {
-                    return Double.NaN
-                }
-                result += semesters[i]!!.calculateCreditIndex()
-            }
-            return result / semesters.size
-        }
     }
 }

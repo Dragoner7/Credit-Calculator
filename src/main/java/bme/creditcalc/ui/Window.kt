@@ -24,6 +24,7 @@ object Window : JFrame("Credit Calculator") {
     private var creditLabel: JLabel? = null
     private var averageLabel: JLabel? = null
     private var creditIndexLabel: JLabel? = null
+    private var leckekonyvView = LeckekonyvView(leckekonyv)
 
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
@@ -43,7 +44,7 @@ object Window : JFrame("Credit Calculator") {
         infoPanel.add(averageLabel)
         infoPanel.add(creditIndexLabel)
         mainPanel.add(infoPanel, BorderLayout.SOUTH)
-        leckekonyv.addListDataListener(object : ListDataListener {
+        leckekonyvView.addListDataListener(object : ListDataListener {
             override fun intervalAdded(e: ListDataEvent) {
                 update()
             }
@@ -92,12 +93,12 @@ object Window : JFrame("Credit Calculator") {
 
     private fun initializeComboBox() {
         val topPanel = JPanel()
-        val comboBox = JComboBox(leckekonyv)
+        val comboBox = JComboBox(leckekonyvView)
         val dim = comboBox.preferredSize
         dim.width = 400
         comboBox.preferredSize = dim
         topPanel.add(comboBox)
-        leckekonyv.addSelectedChangedListener { updateTableModel() }
+        leckekonyvView.addSelectedChangedListener { updateTableModel() }
         val newButton = JButton("New")
         topPanel.add(newButton)
         newButton.addActionListener { addSemesterDialog() }
@@ -143,13 +144,13 @@ object Window : JFrame("Credit Calculator") {
     }
 
     private fun updateTableModel() {
-        val selected = leckekonyv.selectedItem as Semester
+        val selected = leckekonyvView.selectedItem as Semester
         table!!.model = selected.view
         updateAverages()
     }
 
     private fun updateAverages() {
-        val selected = leckekonyv.selectedItem as Semester?
+        val selected = leckekonyvView.selectedItem
         creditLabel!!.text = "Credits: " + (selected?.sumCredit(false, false) ?: 0.0)
         averageLabel!!.text = "Average: " + (selected?.calculateAverage(false, false) ?: Double.NaN)
         creditIndexLabel!!.text = "CreditIndex: " + (selected?.calculateCreditIndex() ?: Double.NaN)
@@ -192,14 +193,14 @@ object Window : JFrame("Credit Calculator") {
     }
 
     private fun deleteLastSemester() {
-        leckekonyv.selectedItem?.let { leckekonyv.removeElement(it) }
+        leckekonyvView.selectedItem?.let { leckekonyvView.removeElement(it) }
     }
 
     fun addSemester(semester: Semester?) {
         val semesterTable = SemesterTable()
         semester!!.attachView(semesterTable)
         semesterTable.setModel(semester)
-        leckekonyv.addElement(semester)
+        leckekonyvView.addElement(semester)
     }
 
     private fun loadSemester() {
@@ -215,17 +216,17 @@ object Window : JFrame("Credit Calculator") {
     }
 
     private fun addNewSubject() {
-        val currentSemester = leckekonyv.selectedItem as Semester
+        val currentSemester = leckekonyvView.selectedItem as Semester
         currentSemester.addSubject(Subject("New Subject", 0.0, 1))
     }
 
     private fun addSubject(row: Int) {
-        val currentSemester = leckekonyv.selectedItem as Semester
+        val currentSemester = leckekonyvView.selectedItem as Semester
         currentSemester.addSubjectAt(row, Subject("New Subject", 0.0, 1))
     }
 
     private fun deleteSubject(row: Int) {
-        val currentSemester = leckekonyv.selectedItem as Semester
+        val currentSemester = leckekonyvView.selectedItem as Semester
         currentSemester.removeSubjectAt(row)
     }
 

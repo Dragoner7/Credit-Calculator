@@ -11,7 +11,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import javax.swing.SwingWorker
 
-class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester?, Any?>() {
+open class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester?, Any?>() {
     @Throws(IOException::class)
     private fun readXLSX(): Semester? {
         if (!XLSXFileFilter().accept(file)) {
@@ -26,8 +26,8 @@ class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester
             return null
         }
         val result = Semester(date.substring(date.length - 7, date.length - 3).toInt(), date.substring(date.length - 1).toInt())
-        for (i in 0 until model.size) {
-            if (result == model.getElementAt(i)) {
+        for(preexistingSemester in model.semesters){
+            if (result == preexistingSemester) {
                 workbook.close()
                 fis.close()
                 return null
@@ -59,28 +59,26 @@ class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester
         }
     }
 
-    protected fun basicFormatCheck(header: Row): Boolean {
+    private fun basicFormatCheck(header: Row): Boolean {
         return header.getCell(1).toString().contains("Tárgy") &&
                 header.getCell(2).toString().contains("Kr.") &&
                 header.getCell(7).toString().contains("Jegyek")
     }
 
-    companion object {
-        private fun findGrade(string: String): Int {
-            val grades = IntArray(6)
-            grades[0] = -1
-            grades[1] = string.indexOf("Elégtelen")
-            grades[2] = string.indexOf("Elégséges")
-            grades[3] = string.indexOf("Közepes")
-            grades[4] = string.indexOf("Jó")
-            grades[5] = string.indexOf("Jeles")
-            var highest = 0
-            for (i in 0..5) {
-                if (grades[i] > grades[highest]) {
-                    highest = i
-                }
+    private fun findGrade(string: String): Int {
+        val grades = IntArray(6)
+        grades[0] = -1
+        grades[1] = string.indexOf("Elégtelen")
+        grades[2] = string.indexOf("Elégséges")
+        grades[3] = string.indexOf("Közepes")
+        grades[4] = string.indexOf("Jó")
+        grades[5] = string.indexOf("Jeles")
+        var highest = 0
+        for (i in 0..5) {
+            if (grades[i] > grades[highest]) {
+                highest = i
             }
-            return highest
         }
+        return highest
     }
 }
