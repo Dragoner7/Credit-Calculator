@@ -34,7 +34,6 @@ object Window : JFrame("Credit Calculator") {
         initializeContent()
         isResizable = false
         pack()
-        LafManager.install(DarculaTheme())
     }
 
     private fun initializeContent() {
