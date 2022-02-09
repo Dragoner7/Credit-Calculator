@@ -1,34 +1,28 @@
 package bme.creditcalc.model
 
+import bme.creditcalc.ui.SemesterTable
 import java.util.*
 import javax.swing.table.AbstractTableModel
 
 data class Semester(val year: Int, val semester: Int) {
     private var subjectsBacking = mutableListOf<Subject>()
     val subjects : List<Subject> = subjectsBacking
-    var view: AbstractTableModel? = null
-        private set
+    val view: AbstractTableModel = SemesterTable().also { it.setModel(this) }
     var date: SemesterDate = SemesterDate(year, semester)
 
     fun addSubject(s: Subject) {
         subjectsBacking.add(s)
-        if (view != null) {
-            view!!.fireTableRowsInserted(subjects.indexOf(s), subjects.indexOf(s))
-        }
+        view.fireTableRowsInserted(subjects.indexOf(s), subjects.indexOf(s))
     }
 
     fun removeSubject(s: Subject) {
         subjectsBacking.remove(s)
-        if (view != null) {
-            view!!.fireTableRowsDeleted(subjects.indexOf(s), subjects.indexOf(s))
-        }
+        view.fireTableRowsDeleted(subjects.indexOf(s), subjects.indexOf(s))
     }
 
     fun removeSubjectAt(row: Int) {
         subjectsBacking.removeAt(row)
-        if (view != null) {
-            view!!.fireTableRowsDeleted(row, row)
-        }
+        view.fireTableRowsDeleted(row, row)
     }
 
     fun addSubjectAt(row: Int, s: Subject) {
@@ -37,9 +31,7 @@ data class Semester(val year: Int, val semester: Int) {
             return
         }
         subjectsBacking.add(row, s)
-        if (view != null) {
-            view!!.fireTableRowsInserted(row, row)
-        }
+        view.fireTableRowsInserted(row, row)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -53,15 +45,7 @@ data class Semester(val year: Int, val semester: Int) {
         return Objects.hash(date)
     }
 
-    fun attachView(view: AbstractTableModel?) {
-        this.view = view
-    }
-
-    fun detachView() {
-        view = null
-    }
-
-    fun calculateAverage(mintaOnly: Boolean, finalizedOnly: Boolean): Double {
+    fun calculateAverage(mintaOnly: Boolean = false, finalizedOnly: Boolean = false): Double {
         return sumGradeCredit(mintaOnly, finalizedOnly) / sumCredit(mintaOnly, finalizedOnly)
     }
 

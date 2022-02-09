@@ -50,10 +50,9 @@ open class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Sem
 
     override fun done() {
         try {
-            if (get() == null) {
-                return
+            get()?.let {
+                Window.addSemester(it)
             }
-            Window.addSemester(get())
         } catch (e: Exception) {
             e.printStackTrace()
         }
