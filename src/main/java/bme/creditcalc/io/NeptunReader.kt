@@ -1,4 +1,4 @@
-package bme.creditcalc.neptunreader
+package bme.creditcalc.io
 
 import bme.creditcalc.model.Leckekonyv
 import bme.creditcalc.model.Semester
@@ -14,7 +14,7 @@ import javax.swing.SwingWorker
 open class NeptunReader(var file: File, var model: Leckekonyv) : SwingWorker<Semester?, Any?>() {
     @Throws(IOException::class)
     private fun readXLSX(): Semester? {
-        if (!XLSXFileFilter().accept(file)) {
+        if (!ExtensionBasedFileFilter().accept(file)) {
             return null
         }
         val fis = FileInputStream(file)

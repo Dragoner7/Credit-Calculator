@@ -1,36 +1,42 @@
 package bme.creditcalc.model
 
 import bme.creditcalc.ui.SemesterTable
+import com.squareup.moshi.Json
 import java.util.*
 import javax.swing.table.AbstractTableModel
 
 data class Semester(val year: Int, val semester: Int) {
-    private var subjectsBacking = mutableListOf<Subject>()
-    val subjects : List<Subject> = subjectsBacking
+    @Json(name = "subjects")
+    private var subjectsMutable = mutableListOf<Subject>()
+    val subjects : List<Subject>
+    get() {
+        return subjectsMutable
+    }
     val view: AbstractTableModel = SemesterTable().also { it.setModel(this) }
+    @Transient
     var date: SemesterDate = SemesterDate(year, semester)
 
     fun addSubject(s: Subject) {
-        subjectsBacking.add(s)
-        view.fireTableRowsInserted(subjects.indexOf(s), subjects.indexOf(s))
+        subjectsMutable.add(s)
+        view.fireTableRowsInserted(subjectsMutable.indexOf(s), subjectsMutable.indexOf(s))
     }
 
     fun removeSubject(s: Subject) {
-        subjectsBacking.remove(s)
-        view.fireTableRowsDeleted(subjects.indexOf(s), subjects.indexOf(s))
+        subjectsMutable.remove(s)
+        view.fireTableRowsDeleted(subjectsMutable.indexOf(s), subjectsMutable.indexOf(s))
     }
 
     fun removeSubjectAt(row: Int) {
-        subjectsBacking.removeAt(row)
+        subjectsMutable.removeAt(row)
         view.fireTableRowsDeleted(row, row)
     }
 
     fun addSubjectAt(row: Int, s: Subject) {
-        if (row > subjects.size || row < 0) {
+        if (row > subjectsMutable.size || row < 0) {
             addSubject(s)
             return
         }
-        subjectsBacking.add(row, s)
+        subjectsMutable.add(row, s)
         view.fireTableRowsInserted(row, row)
     }
 
@@ -51,7 +57,7 @@ data class Semester(val year: Int, val semester: Int) {
 
     fun calculateCreditIndex(): Double {
         var sumGradeTimesCredit = 0.0
-        for (s in subjects) {
+        for (s in subjectsMutable) {
             sumGradeTimesCredit += s.credit * s.grade
         }
         return sumGradeTimesCredit / 30
@@ -59,7 +65,7 @@ data class Semester(val year: Int, val semester: Int) {
 
     fun sumGradeCredit(mintaOnly: Boolean = false, finalizedOnly: Boolean = false): Double {
         var sumGrade = 0.0
-        for (s in subjects) {
+        for (s in subjectsMutable) {
             if ((!mintaOnly || s.minta) && (!finalizedOnly || s.isFinalized)) {
                 sumGrade += s.grade * s.credit
             }
@@ -69,7 +75,7 @@ data class Semester(val year: Int, val semester: Int) {
 
     fun sumCredit(mintaOnly: Boolean = false, finalizedOnly: Boolean = false): Double {
         var sumCredit = 0.0
-        for (s in subjects) {
+        for (s in subjectsMutable) {
             if ((!mintaOnly || s.minta) && (!finalizedOnly || s.isFinalized)) {
                 sumCredit += s.credit
             }

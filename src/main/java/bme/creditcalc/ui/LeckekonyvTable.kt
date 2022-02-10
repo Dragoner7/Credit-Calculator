@@ -11,7 +11,7 @@ import javax.swing.JScrollPane
 import javax.swing.JTable
 import javax.swing.table.DefaultTableModel
 
-class LeckekonyvTable(val leckekonyv: Leckekonyv) {
+class LeckekonyvTable(var leckekonyv: Leckekonyv) {
     private var table = JTable(null)
     val view = JScrollPane(table)
     private val tableMenu = JPopupMenu()

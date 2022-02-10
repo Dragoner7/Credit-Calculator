@@ -1,31 +1,43 @@
 package bme.creditcalc.ui
 
+import bme.creditcalc.io.LoadWorker
 import bme.creditcalc.model.Leckekonyv
 import bme.creditcalc.model.Semester
 import bme.creditcalc.model.Subject
-import bme.creditcalc.neptunreader.NeptunReader
-import bme.creditcalc.neptunreader.XLSXFileFilter
-import com.github.weisj.darklaf.LafManager
-import com.github.weisj.darklaf.theme.DarculaTheme
+import bme.creditcalc.io.NeptunReader
+import bme.creditcalc.io.SaveWorker
+import bme.creditcalc.io.ExtensionBasedFileFilter
 import java.awt.BorderLayout
 import java.awt.Color
+import java.io.File
 import javax.swing.*
 import javax.swing.event.ListDataEvent
 import javax.swing.event.ListDataListener
 
+
 object Window : JFrame("Credit Calculator") {
     val DONE_COLOR = Color(0x368058)
 
-    val leckekonyv = Leckekonyv()
+    var leckekonyv = Leckekonyv()
 
     private val mainPanel: JPanel = JPanel(BorderLayout())
 
     private var leckekonyvComboBox = LeckekonyvComboBox(leckekonyv)
     private var leckekonyvTable : LeckekonyvTable = LeckekonyvTable(leckekonyv)
-    private var semesterAverageView = SemesterAverageView(leckekonyvComboBox.selectedItem)
+    private var semesterAverageView = SemesterAverageView(leckekonyvComboBox.model.selectedItem)
+
+    private var windowListDataListener = WindowListDataListener()
 
     init {
         initializeSwing()
+    }
+
+    fun switchLeckekonyv(leckekonyv: Leckekonyv){
+        this.leckekonyv = leckekonyv
+        this.leckekonyvTable.leckekonyv = leckekonyv
+        this.leckekonyvComboBox.model.leckekonyv = leckekonyv
+        leckekonyvComboBox.model.setSelectedItem(leckekonyv.semesters[0])
+        onSemesterChange()
     }
 
     private fun initializeSwing() {
@@ -37,10 +49,11 @@ object Window : JFrame("Credit Calculator") {
     }
 
     private fun initializeContent() {
-        createBottomPanel()
-        createMenuBar()
-        initializeTable()
+        initializeTopPanel()
         initializeComboBox()
+        initializeTable()
+        initializeBottomPanel()
+        createMenuBar()
     }
 
     private fun initializeTable() {
@@ -50,42 +63,48 @@ object Window : JFrame("Credit Calculator") {
     }
 
     private fun initializeComboBox() {
-        createTopPanel()
-        leckekonyvComboBox.addListDataListener(WindowListDataListener())
+        leckekonyvComboBox.model.addListDataListener(windowListDataListener)
     }
 
-    private fun createBottomPanel() {
+    private fun initializeBottomPanel() {
         mainPanel.add(semesterAverageView.view, BorderLayout.SOUTH)
     }
 
-    private fun createTopPanel() {
-        val topPanel = JPanel()
-        val comboBox = JComboBox(leckekonyvComboBox)
-        val dim = comboBox.preferredSize
-        dim.width = 400
-        comboBox.preferredSize = dim
-        topPanel.add(comboBox)
-        val newButton = JButton("New")
-        topPanel.add(newButton)
-        newButton.addActionListener {
+    private fun initializeTopPanel() {
+        leckekonyvComboBox.newSemesterListener.add{
             chooseSemesterSource()
         }
-        val deleteButton = JButton("Delete")
-        topPanel.add(deleteButton)
-        deleteButton.addActionListener { removeLastSemester() }
-        mainPanel.add(topPanel, BorderLayout.NORTH)
+        leckekonyvComboBox.deleteSemesterListener.add{
+            removeLastSemester()
+        }
+        mainPanel.add(leckekonyvComboBox.view, BorderLayout.NORTH)
     }
 
     private fun chooseSemesterSource() {
         when (semesterSourceDialog(this)) {
-            0 -> userCreateEmptySemester()
-            1 -> userImportSemester()
+            0 -> promptEmptySemesterCreationDialogs()
+            1 -> promptAndImportNeptunXLSX()
         }
     }
 
     private fun createMenuBar() {
         val menuBar = JMenuBar()
         jMenuBar = menuBar
+        val fileMenu = JMenu("File")
+        menuBar.add(fileMenu)
+        val saveMenuItem = JMenuItem("Save")
+        fileMenu.add(saveMenuItem)
+        val loadMenuItem = JMenuItem("Load")
+        fileMenu.add(loadMenuItem)
+
+        saveMenuItem.addActionListener {
+            promptAndSaveJSON()
+        }
+
+        loadMenuItem.addActionListener {
+            promptAndLoadJSON()
+        }
+
         val subjectsMenu = JMenu("Subjects")
         menuBar.add(subjectsMenu)
         val addSubjectMenuItem = JMenuItem("Add")
@@ -111,19 +130,19 @@ object Window : JFrame("Credit Calculator") {
     }
 
     private fun onSemesterChange() {
-        leckekonyvTable.setSemester(leckekonyvComboBox.selectedItem)
-        semesterAverageView.setSemester(leckekonyvComboBox.selectedItem)
+        leckekonyvTable.setSemester(leckekonyvComboBox.model.selectedItem)
+        semesterAverageView.setSemester(leckekonyvComboBox.model.selectedItem)
     }
 
     fun addSemester(semester: Semester) {
-        leckekonyvComboBox.addElement(semester)
+        leckekonyvComboBox.model.addElement(semester)
     }
 
     private fun removeLastSemester() {
-        leckekonyvComboBox.selectedItem?.let { leckekonyvComboBox.removeElement(it) }
+        leckekonyvComboBox.model.selectedItem?.let { leckekonyvComboBox.model.removeElement(it) }
     }
 
-    private fun userCreateEmptySemester() {
+    private fun promptEmptySemesterCreationDialogs() {
         try {
             val selectedYear = yearDialog(this)
             val selectedSemester = semesterDialog(this)
@@ -135,9 +154,9 @@ object Window : JFrame("Credit Calculator") {
         }
     }
 
-    private fun userImportSemester() {
+    private fun promptAndImportNeptunXLSX() {
         val fc = JFileChooser(System.getProperty("user.dir"))
-        fc.fileFilter = XLSXFileFilter()
+        fc.fileFilter = ExtensionBasedFileFilter(".xlsx")
         val returnVal = fc.showOpenDialog(this)
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             val file = fc.selectedFile
@@ -145,18 +164,42 @@ object Window : JFrame("Credit Calculator") {
         }
     }
 
+    private fun promptAndLoadJSON() {
+        val fc = JFileChooser(System.getProperty("user.dir"))
+        fc.fileFilter = ExtensionBasedFileFilter(".json")
+        val returnVal = fc.showOpenDialog(this)
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            val file = fc.selectedFile
+            LoadWorker(file).execute()
+        }
+    }
+
+    private fun promptAndSaveJSON() {
+        val fc = JFileChooser(System.getProperty("user.dir"))
+        val filter = ExtensionBasedFileFilter(".json")
+        fc.fileFilter = filter
+        val returnVal = fc.showSaveDialog(this)
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            var file = fc.selectedFile
+            if(!filter.accept(file)){
+                file = File(file.path + ".json")
+            }
+            SaveWorker(file, leckekonyv).execute()
+        }
+    }
+
     private fun addNewSubject() {
-        val currentSemester = leckekonyvComboBox.selectedItem
+        val currentSemester = leckekonyvComboBox.model.selectedItem
         currentSemester?.addSubject(Subject("New Subject", 0.0, 1))
     }
 
     private fun addSubject(row: Int) {
-        val currentSemester = leckekonyvComboBox.selectedItem
+        val currentSemester = leckekonyvComboBox.model.selectedItem
         currentSemester?.addSubjectAt(row, Subject("New Subject", 0.0, 1))
     }
 
     private fun removeSubject(row: Int) {
-        val currentSemester = leckekonyvComboBox.selectedItem
+        val currentSemester = leckekonyvComboBox.model.selectedItem
         currentSemester?.removeSubjectAt(row)
     }
 

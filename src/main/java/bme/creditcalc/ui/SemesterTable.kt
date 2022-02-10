@@ -11,7 +11,7 @@ class SemesterTable : AbstractTableModel() {
     }
 
     override fun getRowCount(): Int {
-        return semester!!.subjects.size
+        return semester?.subjects?.size ?: 0
     }
 
     override fun getColumnCount(): Int {
@@ -29,6 +29,9 @@ class SemesterTable : AbstractTableModel() {
     }
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
+        if(semester == null){
+            return ""
+        }
         return when (columnIndex) {
             0 -> semester!!.subjects[rowIndex].name
             1 -> semester!!.subjects[rowIndex].credit
@@ -53,6 +56,9 @@ class SemesterTable : AbstractTableModel() {
     }
 
     override fun setValueAt(aValue: Any, rowIndex: Int, columnIndex: Int) {
+        if(semester == null){
+            return
+        }
         when (columnIndex) {
             0 -> semester!!.subjects[rowIndex].name = aValue as String
             1 -> semester!!.subjects[rowIndex].credit = aValue as Double
